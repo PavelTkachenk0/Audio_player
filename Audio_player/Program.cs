@@ -1,6 +1,9 @@
+using Audio_player.AppSettingsOptions;
 using Audio_player.DAL;
+using Audio_player.Hubs;
 using FastEndpoints;
 using FastEndpoints.Swagger;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
@@ -41,6 +44,10 @@ try
     })
     .UseSwaggerGen();
 
+    app.UseRouting();
+
+    app.MapHub<AudioHub>("/audioHub");
+
     app.MapDefaultControllerRoute();
 
     app.Run();
@@ -74,4 +81,8 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
      });
 
     services.AddControllers();
+
+    services.AddSignalR();
+
+    services.AddOptions<FileStoreOptions>().BindConfiguration("FileStore");
 }
