@@ -1,5 +1,7 @@
+using Audio_player.DAL;
 using FastEndpoints;
 using FastEndpoints.Swagger;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -53,12 +55,17 @@ finally
     Log.CloseAndFlush();
 }
 
-void ConfigureServices(IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
+static void ConfigureServices(IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
 {
     services.SwaggerDocument(swagger =>
     {
         swagger.EnableJWTBearerAuth = false;
 
+    });
+
+    services.AddDbContext<AppDbContext>(opt =>
+    {
+        opt.UseNpgsql(configuration.GetConnectionString(nameof(Audio_player)));
     });
 
     services.AddFastEndpoints(o =>
