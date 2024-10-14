@@ -4,7 +4,6 @@ using Audio_player.Endpoints.Files;
 using Audio_player.Models.Requests;
 using FastEndpoints;
 using Microsoft.Extensions.Options;
-using System.IO;
 
 namespace Audio_player.Endpoints.AudioFiles;
 

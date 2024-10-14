@@ -44,6 +44,8 @@ try
     })
     .UseSwaggerGen();
 
+    app.UseCors("CorsPolicy");
+
     app.UseRouting();
 
     app.MapHub<AudioHub>("/audioHub");
@@ -73,6 +75,15 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
     services.AddDbContext<AppDbContext>(opt =>
     {
         opt.UseNpgsql(configuration.GetConnectionString(nameof(Audio_player)));
+    });
+
+    services.AddCors(options =>
+    {
+        options.AddPolicy("CorsPolicy", builder => builder
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials()
+            .SetIsOriginAllowed((host) => true));
     });
 
     services.AddFastEndpoints(o =>
