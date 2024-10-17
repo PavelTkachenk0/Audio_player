@@ -11,10 +11,15 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
     public DbSet<AppUserRole> AppUserRoles { get; set; }
     public DbSet<UserProfile> UserProfiles { get; set; }
     public DbSet<Song> Songs { get; set; }
+    public DbSet<UserSongs> UserSongs { get; set; }
     public DbSet<Playlist> Playlists { get; set; }
     public DbSet<UserPlaylist> UserPlaylists { get; set; }
     public DbSet<Album> Albums { get; set; }
     public DbSet<UserAlbum> UserAlbums { get; set; }
+    public DbSet<Artist> Artists { get; set; }
+    public DbSet<ArtistAlbum> ArtistAlbums { get; set; }
+    public DbSet<ArtistSong> ArtistSongs { get; set; }
+    public DbSet<UserArtist> UserArtists { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
