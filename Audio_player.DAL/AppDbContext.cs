@@ -10,6 +10,7 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
     public DbSet<AppUser> AppUsers { get; set; }
     public DbSet<AppUserRole> AppUserRoles { get; set; }
     public DbSet<UserProfile> UserProfiles { get; set; }
+    public DbSet<Song> Songs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
