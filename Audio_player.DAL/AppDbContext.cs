@@ -12,6 +12,11 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
     public DbSet<UserProfile> UserProfiles { get; set; }
     public DbSet<Song> Songs { get; set; }
 
+
+
+    public DbSet<Playlist> Playlists { get; set; }
+    public DbSet<UserPlaylist> UserPlaylists { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(GetType().Assembly);
