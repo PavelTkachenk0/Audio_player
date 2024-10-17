@@ -20,6 +20,10 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
     public DbSet<ArtistAlbum> ArtistAlbums { get; set; }
     public DbSet<ArtistSong> ArtistSongs { get; set; }
     public DbSet<UserArtist> UserArtists { get; set; }
+    public DbSet<Genre> Genres { get; set; }
+    public DbSet<GenreSong> GenreSongs { get; set; }
+    public DbSet<GenreAlbum> GenreAlbums { get; set; }
+    public DbSet<GenreArtist> GenreArtists { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
