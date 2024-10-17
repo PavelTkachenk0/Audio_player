@@ -7,6 +7,8 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
 {
     public DbSet<AudioFile> AudioFiles { get; set; }
     public DbSet<AppRole> AppRoles { get; set; }
+    public DbSet<AppUser> AppUsers { get; set; }
+    public DbSet<AppUserRole> AppUserRoles { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
