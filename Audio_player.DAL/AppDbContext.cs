@@ -6,6 +6,7 @@ namespace Audio_player.DAL;
 public class AppDbContext(DbContextOptions options) : DbContext(options)
 {
     public DbSet<AudioFile> AudioFiles { get; set; }
+    public DbSet<AppRole> AppRoles { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
