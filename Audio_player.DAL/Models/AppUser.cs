@@ -5,7 +5,7 @@ namespace Audio_player.DAL.Models;
 
 public class AppUser : BaseEntity<long>
 {
-    public string Login { get; set; } = null!;
+    public string Email { get; set; } = null!;
     public string Password { get; set; } = null!; 
     public ICollection<AppRole> Roles { get; set; } = new HashSet<AppRole>();
     public ICollection<AppUserRole> UserRoles { get; set; } = new HashSet<AppUserRole>();  
@@ -16,8 +16,8 @@ public class AppUserConfig : IEntityTypeConfiguration<AppUser>
 {
     public void Configure(EntityTypeBuilder<AppUser> builder)
     {
-        builder.Property(x => x.Login).HasMaxLength(100);
-        builder.Property(x => x.Password).HasMaxLength(100);
+        builder.Property(x => x.Email).HasMaxLength(255);
+        builder.Property(x => x.Password).HasMaxLength(255);
 
         builder.HasMany(x => x.Roles)
             .WithMany(x => x.Users)
