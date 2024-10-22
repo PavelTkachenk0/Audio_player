@@ -6,10 +6,9 @@ namespace Audio_player.DAL.Models;
 
 public class UserProfile : BaseEntity<long>
 {
-    public string Name { get; set; } = null!;
+    public string? Name { get; set; } = null!;
     public string? Surname { get; set; } 
-    public DateTime? Birthdate { get; set; }
-    public string? Email { get; set; } 
+    public DateOnly? Birthdate { get; set; }
     public long AppUserId { get; set; }
     public AppUser? AppUser { get; set; }
     public ICollection<Song> Songs { get; set; } = new HashSet<Song>();
@@ -28,7 +27,6 @@ public class UserProfileConfig : IEntityTypeConfiguration<UserProfile>
     {
         builder.Property(x => x.Name).HasMaxLength(100);
         builder.Property(x => x.Surname).HasMaxLength(100);
-        builder.Property(x => x.Email).HasMaxLength(1000);
 
         builder.HasOne(x => x.AppUser)
             .WithOne(x => x.UserProfile)
