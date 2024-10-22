@@ -8,7 +8,7 @@ public class UserProfile : BaseEntity<long>
 {
     public string? Name { get; set; } = null!;
     public string? Surname { get; set; } 
-    public DateTime? Birthdate { get; set; }
+    public DateOnly? Birthdate { get; set; }
     public long AppUserId { get; set; }
     public AppUser? AppUser { get; set; }
     public ICollection<Song> Songs { get; set; } = new HashSet<Song>();
