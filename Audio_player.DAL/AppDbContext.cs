@@ -24,6 +24,7 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
     public DbSet<GenreSong> GenreSongs { get; set; }
     public DbSet<GenreAlbum> GenreAlbums { get; set; }
     public DbSet<GenreArtist> GenreArtists { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

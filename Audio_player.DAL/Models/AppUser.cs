@@ -10,6 +10,7 @@ public class AppUser : BaseEntity<long>
     public ICollection<AppRole> Roles { get; set; } = new HashSet<AppRole>();
     public ICollection<AppUserRole> UserRoles { get; set; } = new HashSet<AppUserRole>();  
     public UserProfile? UserProfile { get; set; }
+    public ICollection<RefreshToken> RefreshTokens { get; set; } = new HashSet<RefreshToken>();
 }
 
 public class AppUserConfig : IEntityTypeConfiguration<AppUser>
@@ -31,5 +32,9 @@ public class AppUserConfig : IEntityTypeConfiguration<AppUser>
                     .WithMany(x => x.UserRoles)
                     .HasForeignKey(x => x.UserId)
             );
+
+        builder.HasMany(x => x.RefreshTokens)
+            .WithOne(x => x.User)
+            .HasForeignKey(x => x.UserId);
     }
 }

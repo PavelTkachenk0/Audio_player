@@ -16,7 +16,6 @@ public class PostAudioFileEndpoint(IOptionsSnapshot<FileStoreOptions> optionsSna
     {
         Post("");
         Group<AudioFileGroup>();
-        AllowAnonymous();
         AllowFileUploads(dontAutoBindFormData: true);
     }
 
