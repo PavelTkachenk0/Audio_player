@@ -28,7 +28,7 @@ public class LoginEndpoint(AppDbContext appDbContext, GenerateTokenHelper tokenH
     {
         var user = await _appDbContext.AppUsers.SingleAsync(x => x.Email == req.Email, ct);
 
-        var accessToken = _tokenHelper.GenerateAccessToken(user.Email);
+        var accessToken = await _tokenHelper.GenerateAccessToken(user.Email, ct);
 
         await _tokenHelper.SetRefreshTokenCookieAsync(HttpContext.Response, user.Email, ct);
 

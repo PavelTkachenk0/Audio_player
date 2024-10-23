@@ -39,7 +39,7 @@ public class RegisterEndpoint(AppDbContext appDbContext, GenerateTokenHelper tok
 
         await _appDbContext.SaveChangesAsync(ct);
 
-        var accessToken = _tokenHelper.GenerateAccessToken(user.Entity.Email);
+        var accessToken = await _tokenHelper.GenerateAccessToken(user.Entity.Email, ct);
 
         await _tokenHelper.SetRefreshTokenCookieAsync(HttpContext.Response, user.Entity.Email, ct);
 
