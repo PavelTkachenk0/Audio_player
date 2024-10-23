@@ -8,7 +8,7 @@ public class AccessToken : BaseEntity<long>
     public long UserId { get; set; }
     public string Jti { get; set; } = null!;
     public DateTime ExpiryDate { get; set; }
-    public bool? IsRevoked { get; set; }
+    public bool IsRevoked { get; set; }
     public AppUser User { get; set; } = null!;
 }
 
