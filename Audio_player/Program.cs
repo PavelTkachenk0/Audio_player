@@ -2,6 +2,7 @@ using Audio_player.AppSettingsOptions;
 using Audio_player.DAL;
 using Audio_player.Helpers;
 using Audio_player.Hubs;
+using Audio_player.Middlewares;
 using FastEndpoints;
 using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -47,6 +48,8 @@ try
     .UseSwaggerGen();
 
     app.UseCors("CorsPolicy");
+
+    app.UseMiddleware<AccessTokenValidationMiddleware>();
 
     app.UseRouting();
 

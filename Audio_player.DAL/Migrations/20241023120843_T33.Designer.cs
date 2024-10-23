@@ -3,6 +3,7 @@ using System;
 using Audio_player.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Audio_player.DAL.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241023120843_T33")]
+    partial class T33
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -33,7 +36,7 @@ namespace Audio_player.DAL.Migrations
                     b.Property<DateTime>("ExpiryDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<bool>("IsRevoked")
+                    b.Property<bool?>("IsRevoked")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
                         .HasDefaultValue(false);
@@ -329,7 +332,7 @@ namespace Audio_player.DAL.Migrations
                     b.Property<DateTime>("ExpiryDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<bool>("IsRevoked")
+                    b.Property<bool?>("IsRevoked")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
                         .HasDefaultValue(false);
