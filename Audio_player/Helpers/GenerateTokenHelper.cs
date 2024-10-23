@@ -13,9 +13,15 @@ public class GenerateTokenHelper(IOptionsSnapshot<AuthOptions> optionsSnapshot, 
     private readonly AuthOptions _authOptions = optionsSnapshot.Value;
     private readonly AppDbContext _appDbContext = appDbContext;
 
-    public string GenerateAccessToken(string email)
+    public async Task<string> GenerateAccessToken(string email, CancellationToken ct)
     {
-        var claims = new List<Claim> { new(ClaimTypes.Name, email) };
+        var jti = Guid.NewGuid().ToString();
+        var claims = new List<Claim>
+        {
+            new(JwtRegisteredClaimNames.Sub, email),
+            new(JwtRegisteredClaimNames.Jti, jti)
+        };
+
         var token = new JwtSecurityToken(
         issuer: _authOptions.Issuer,
         audience: _authOptions.Audience,
@@ -23,6 +29,15 @@ public class GenerateTokenHelper(IOptionsSnapshot<AuthOptions> optionsSnapshot, 
             expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(15)),
             signingCredentials: new SigningCredentials(_authOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256)
         );
+
+        _appDbContext.AccessTokens.Add(new DAL.Models.AccessToken
+        {
+            ExpiryDate = DateTime.UtcNow.AddMinutes(15),
+            Jti = jti,
+            User = await _appDbContext.AppUsers.SingleAsync(x => x.Email == email, ct),
+        });
+
+        await _appDbContext.SaveChangesAsync(ct);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
@@ -56,5 +71,17 @@ public class GenerateTokenHelper(IOptionsSnapshot<AuthOptions> optionsSnapshot, 
         });
 
         return refreshToken;
+    }
+
+    public async Task RevokeAccessTokenAsync(string jti, CancellationToken ct)
+    {
+        var token = await _appDbContext.AccessTokens.SingleOrDefaultAsync(x => x.Jti == jti, ct) 
+            ?? throw new Exception("Access token not found");
+
+        token.IsRevoked = true;
+
+        _appDbContext.AccessTokens.Update(token);
+
+        await _appDbContext.SaveChangesAsync(ct);
     }
 }

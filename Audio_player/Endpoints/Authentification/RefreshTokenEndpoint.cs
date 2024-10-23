@@ -29,7 +29,7 @@ public class RefreshTokenEndpoint(AppDbContext appDbContext, GenerateTokenHelper
 
         var tokenData = await _appDbContext.RefreshTokens.SingleOrDefaultAsync(x => x.Token == refreshToken, ct);
 
-        if (tokenData == null || tokenData.IsRevoked!.Value == true || tokenData.ExpiryDate <= DateTime.UtcNow)
+        if (tokenData == null || tokenData.IsRevoked == true || tokenData.ExpiryDate <= DateTime.UtcNow)
         {
             ThrowError("Invalid or expired refresh token");
         }
@@ -44,7 +44,7 @@ public class RefreshTokenEndpoint(AppDbContext appDbContext, GenerateTokenHelper
             ThrowError("Invalid refresh token");
         }
 
-        var accessToken = _tokenHelper.GenerateAccessToken(user.Email);
+        var accessToken = await _tokenHelper.GenerateAccessToken(user.Email, ct);
         await _tokenHelper.SetRefreshTokenCookieAsync(HttpContext.Response, user.Email, ct);
 
         return new TokenResponse
