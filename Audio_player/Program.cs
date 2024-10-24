@@ -1,4 +1,5 @@
 using Audio_player.AppSettingsOptions;
+using Audio_player.Constants;
 using Audio_player.DAL;
 using Audio_player.Helpers;
 using Audio_player.Hubs;
@@ -9,6 +10,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
+using System.Security.Claims;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -130,7 +132,32 @@ static void ConfigureAuth(IServiceCollection services, IConfiguration configurat
                 ValidAudience = authOptions.Audience,
                 ValidateLifetime = true,
                 IssuerSigningKey = authOptions.GetSymmetricSecurityKey(),
-                ValidateIssuerSigningKey = true
+                ValidateIssuerSigningKey = true,
+                RoleClaimType = ClaimTypes.Role
             };
         });
+
+    services.AddAuthorization(auth =>
+    {
+        auth.FallbackPolicy = auth.DefaultPolicy;
+
+        auth.AddPolicy(PolicyNames.HasAdminRole, p =>
+        {
+            p.RequireAssertion(c => c.Resource is HttpContext httpContext
+                ? c.User.IsInRole(Roles.Admin) : false);
+        });
+
+        auth.AddPolicy(PolicyNames.HasUserRole, p =>
+        {
+            p.RequireAssertion(c => c.Resource is HttpContext httpContext
+                ? c.User.IsInRole(Roles.User) : false);
+        });
+
+        auth.AddPolicy(PolicyNames.HasAdminOrUserRole, p =>
+        {
+            p.RequireAssertion(c => c.Resource is HttpContext httpContext
+                ? (c.User.IsInRole(Roles.Admin) || c.User.IsInRole(Roles.User))
+                : false);
+        });
+    });
 }

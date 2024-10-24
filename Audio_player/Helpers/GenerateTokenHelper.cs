@@ -22,6 +22,16 @@ public class GenerateTokenHelper(IOptionsSnapshot<AuthOptions> optionsSnapshot, 
             new(JwtRegisteredClaimNames.Jti, jti)
         };
 
+        var roles = _appDbContext.AppUsers
+            .Where(x => x.Email == email)
+            .SelectMany(x => x.Roles.Select(x => x.Name))
+            .ToList();
+
+        foreach (var role in roles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
+
         var token = new JwtSecurityToken(
         issuer: _authOptions.Issuer,
         audience: _authOptions.Audience,
