@@ -3,29 +3,37 @@ using Audio_player.Constants;
 using Audio_player.DAL;
 using Audio_player.Models.Requests;
 using FastEndpoints;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 namespace Audio_player.Endpoints.Genres;
 
-public class CreateGenreEndpoint(AppDbContext appDbContext, IOptionsSnapshot<ImageStoreOptions> options) : Endpoint<CreateGenreRequest>
+public class PutGenreEndpoint(AppDbContext appDbContext, IOptionsSnapshot<ImageStoreOptions> optionsSnapshot) : Endpoint<EditGenreRequest>
 {
-    private readonly ImageStoreOptions _options = options.Value;
     private readonly AppDbContext _appDbContext = appDbContext;
+    private readonly ImageStoreOptions _options = optionsSnapshot.Value;
 
     public override void Configure()
     {
-        Post("");
+        Put("{id:int}");
         Group<GenreGroup>();
         AllowFileUploads();
         Policies(PolicyNames.HasAdminRole);
     }
 
-    public async override Task HandleAsync(CreateGenreRequest req, CancellationToken ct)
+    public override async Task HandleAsync(EditGenreRequest req, CancellationToken ct)
     {
-        if (!Files.Any())
+        var id = Route<short>("id");
+
+        var genre = await _appDbContext.Genres.SingleOrDefaultAsync(x => x.Id == id, ct);
+
+        if (genre == null)
         {
-            ThrowError("File can not be empty");
+            await SendNotFoundAsync(ct);
+            return;
         }
+
+        genre.Name = req.Name.ToLower();
 
         if (!Directory.Exists(_options.FilesPath))
         {
@@ -41,14 +49,12 @@ public class CreateGenreEndpoint(AppDbContext appDbContext, IOptionsSnapshot<Ima
 
             await file.CopyToAsync(fileStream, ct);
 
-            _appDbContext.Genres.Add(new DAL.Models.Genre
-            {
-                Name = req.Name.ToLower(),
-                CoverPath = filePath
-            });
+            genre.CoverPath = filePath;
         }
 
+        _appDbContext.Genres.Update(genre);
         await _appDbContext.SaveChangesAsync(ct);
+
         await SendOkAsync(ct);
     }
 }

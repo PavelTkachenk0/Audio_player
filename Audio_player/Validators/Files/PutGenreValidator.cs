@@ -3,9 +3,9 @@ using FluentValidation;
 
 namespace Audio_player.Validators.Files;
 
-public class PostGenreValidator : BasePostImageValidator<CreateGenreRequest>
+public class PutGenreValidator : BasePostImageValidator<EditGenreRequest>
 {
-    public PostGenreValidator() : base()
+    public PutGenreValidator() : base()
     {
         RuleFor(x => x.Name)
             .NotEmpty();
