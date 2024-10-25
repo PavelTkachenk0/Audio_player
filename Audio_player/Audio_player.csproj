@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="13.0.1" />
     <PackageReference Include="FastEndpoints.Generator" Version="5.21.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -24,10 +25,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Audio_player.DAL\Audio_player.DAL.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Models\DTOs\" />
   </ItemGroup>
 
 </Project>
