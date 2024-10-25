@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace Audio_player.Endpoints.Genres;
 
-public class CreateGenreEndpoint(AppDbContext appDbContext, IOptionsSnapshot<ImageStoreOptions> options) : Endpoint<CreateGenreRequest>
+public class PostGenreEndpoint(AppDbContext appDbContext, IOptionsSnapshot<ImageStoreOptions> options) : Endpoint<CreateGenreRequest>
 {
     private readonly ImageStoreOptions _options = options.Value;
     private readonly AppDbContext _appDbContext = appDbContext;
