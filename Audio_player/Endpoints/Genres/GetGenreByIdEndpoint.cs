@@ -22,7 +22,7 @@ public class GetGenreByIdEndpoint(AppDbContext appDbContext, AutoMapper.IMapper 
 
     public override async Task<GenreDTO?> ExecuteAsync(CancellationToken ct)
     {
-        var genreId = Route<int>("id");
+        var genreId = Route<short>("id");
 
         var genre = await _appDbContext.Genres.SingleOrDefaultAsync(x => x.Id ==  genreId, ct);
 
