@@ -45,8 +45,7 @@ public class RefreshTokenEndpoint(AppDbContext appDbContext, GenerateTokenServic
         }
 
         var accessToken = await _tokenService.GenerateAccessToken(user.Email, ct);
-        await _tokenService.SetRefreshTokenCookieAsync(HttpContext.Response, user.Email, ct);
-
+       
         return new TokenResponse
         {
             AccessToken = accessToken
