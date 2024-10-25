@@ -22,6 +22,11 @@ public class CreateGenreEndpoint(AppDbContext appDbContext, IOptionsSnapshot<Ima
 
     public async override Task HandleAsync(CreateGenreRequest req, CancellationToken ct)
     {
+        if (!Files.Any())
+        {
+            ThrowError("File can not be empty");
+        }
+
         if (!Directory.Exists(_options.FilesPath))
         {
             Directory.CreateDirectory(_options.FilesPath);
