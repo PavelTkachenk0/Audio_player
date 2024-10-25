@@ -8,7 +8,7 @@ using System.Security.Claims;
 
 namespace Audio_player.Helpers;
 
-public class GenerateTokenHelper(IOptionsSnapshot<AuthOptions> optionsSnapshot, AppDbContext appDbContext)
+public class GenerateTokenService(IOptionsSnapshot<AuthOptions> optionsSnapshot, AppDbContext appDbContext)
 {
     private readonly AuthOptions _authOptions = optionsSnapshot.Value;
     private readonly AppDbContext _appDbContext = appDbContext;

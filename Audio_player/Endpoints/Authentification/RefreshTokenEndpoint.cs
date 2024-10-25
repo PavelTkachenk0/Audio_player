@@ -6,10 +6,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Audio_player.Endpoints.Authentification;
 
-public class RefreshTokenEndpoint(AppDbContext appDbContext, GenerateTokenHelper tokenHelper) : EndpointWithoutRequest<TokenResponse>
+public class RefreshTokenEndpoint(AppDbContext appDbContext, GenerateTokenService tokenService) : EndpointWithoutRequest<TokenResponse>
 {
     private readonly AppDbContext _appDbContext = appDbContext;
-    private readonly GenerateTokenHelper _tokenHelper = tokenHelper;
+    private readonly GenerateTokenService _tokenService = tokenService;
 
     public override void Configure()
     {
@@ -44,8 +44,8 @@ public class RefreshTokenEndpoint(AppDbContext appDbContext, GenerateTokenHelper
             ThrowError("Invalid refresh token");
         }
 
-        var accessToken = await _tokenHelper.GenerateAccessToken(user.Email, ct);
-        await _tokenHelper.SetRefreshTokenCookieAsync(HttpContext.Response, user.Email, ct);
+        var accessToken = await _tokenService.GenerateAccessToken(user.Email, ct);
+        await _tokenService.SetRefreshTokenCookieAsync(HttpContext.Response, user.Email, ct);
 
         return new TokenResponse
         {

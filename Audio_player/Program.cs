@@ -106,7 +106,7 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
 
     services.AddSignalR();
 
-    services.AddScoped<GenerateTokenHelper>();
+    services.AddScoped<GenerateTokenService>();
 
     services.AddOptions<FileStoreOptions>().BindConfiguration("FileStore");
 
