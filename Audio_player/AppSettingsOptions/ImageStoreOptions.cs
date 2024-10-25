@@ -1,6 +1,6 @@
 ﻿namespace Audio_player.AppSettingsOptions;
 
-public class FileStoreOptions
+public class ImageStoreOptions
 {
     public string FilesPath { get; set; } = null!;
     public string[] AudioExtensions { get; set; } = null!;
