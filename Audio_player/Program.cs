@@ -111,7 +111,7 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
 
     services.AddScoped<GenerateTokenService>();
 
-    services.AddOptions<FileStoreOptions>().BindConfiguration("FileStore");
+    services.AddOptions<ImageStoreOptions>().BindConfiguration("ImageStore");
 
     services.AddOptions<AuthOptions>().BindConfiguration(nameof(AuthOptions));
 }

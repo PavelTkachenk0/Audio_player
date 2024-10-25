@@ -1,32 +1,33 @@
 ﻿using Audio_player.AppSettingsOptions;
+using Audio_player.Constants;
 using Audio_player.DAL;
-using Audio_player.Endpoints.Files;
 using Audio_player.Models.Requests;
 using FastEndpoints;
 using Microsoft.Extensions.Options;
 
-namespace Audio_player.Endpoints.AudioFiles;
+namespace Audio_player.Endpoints.Genres;
 
-public class PostAudioFileEndpoint(IOptionsSnapshot<FileStoreOptions> optionsSnapshot, AppDbContext appDbContext) : Endpoint<PostAudioFileRequest>
+public class CreateGenreEndpoint(AppDbContext appDbContext, IOptionsSnapshot<ImageStoreOptions> options) : Endpoint<CreateGenreRequest>
 {
-    private readonly FileStoreOptions _options = optionsSnapshot.Value;
+    private readonly ImageStoreOptions _options = options.Value;
     private readonly AppDbContext _appDbContext = appDbContext;
 
     public override void Configure()
     {
         Post("");
-        Group<AudioFileGroup>();
-        AllowFileUploads(dontAutoBindFormData: true);
+        Group<GenreGroup>();
+        AllowFileUploads();
+        Policies(PolicyNames.HasAdminRole);
     }
 
-    public override async Task HandleAsync(PostAudioFileRequest req, CancellationToken ct)
+    public async override Task HandleAsync(CreateGenreRequest req, CancellationToken ct)
     {
         if (!Directory.Exists(_options.FilesPath))
         {
             Directory.CreateDirectory(_options.FilesPath);
         }
 
-        foreach(var file in Files)
+        foreach (var file in Files)
         {
             var fileName = file.FileName;
             var filePath = Path.Combine(_options.FilesPath, fileName);
@@ -35,10 +36,10 @@ public class PostAudioFileEndpoint(IOptionsSnapshot<FileStoreOptions> optionsSna
 
             await file.CopyToAsync(fileStream, ct);
 
-            _appDbContext.AudioFiles.Add(new DAL.Models.AudioFile
+            _appDbContext.Genres.Add(new DAL.Models.Genre
             {
-                FileName = fileName,
-                FilePath = filePath
+                Name = req.Name.ToLower(),
+                CoverPath = filePath
             });
         }
 
