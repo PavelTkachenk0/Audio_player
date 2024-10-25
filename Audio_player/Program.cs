@@ -3,6 +3,7 @@ using Audio_player.Constants;
 using Audio_player.DAL;
 using Audio_player.Helpers;
 using Audio_player.Hubs;
+using Audio_player.Mapping;
 using Audio_player.Middlewares;
 using FastEndpoints;
 using FastEndpoints.Swagger;
@@ -101,6 +102,8 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
      });
 
     ConfigureAuth(services, configuration);
+
+    services.AddAutoMapper(typeof(MappingProfile));
 
     services.AddControllers();
 
