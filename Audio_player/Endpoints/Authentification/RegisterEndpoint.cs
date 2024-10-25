@@ -1,4 +1,6 @@
-﻿using Audio_player.DAL;
+﻿using Audio_player.Constants;
+using Audio_player.DAL;
+using Audio_player.DAL.Models;
 using Audio_player.Helpers;
 using Audio_player.Models.Requests;
 using Audio_player.Models.Responses;
@@ -29,7 +31,14 @@ public class RegisterEndpoint(AppDbContext appDbContext, GenerateTokenService to
                 Birthdate = req.Birthday,
                 Name = req.Name,
                 Surname = req.Surname
-            }
+            }, 
+            UserRoles = 
+            [
+                new AppUserRole
+                {
+                    RoleId = 1
+                }
+            ]
         });
 
         await _appDbContext.SaveChangesAsync(ct);
