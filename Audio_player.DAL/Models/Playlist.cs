@@ -6,6 +6,7 @@ namespace Audio_player.DAL.Models;
 public class Playlist : BaseEntity<long>
 {
     public string Name { get; set; } = null!;
+    public string CoverPath { get; set; } = null!;
     public ICollection<UserProfile> Users { get; set; } = new HashSet<UserProfile>();
     public ICollection<UserPlaylist> UserPlaylists { get; set; } = new HashSet<UserPlaylist>();
     public ICollection<Song> Songs { get; set; } = new HashSet<Song>();

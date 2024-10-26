@@ -42,8 +42,8 @@ public class PutGenreEndpoint(AppDbContext appDbContext, IOptionsSnapshot<ImageS
 
         foreach (var file in Files)
         {
-            var fileName = file.FileName;
-            var filePath = Path.Combine(_options.FilesPath, fileName);
+            var newFileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName).ToLower();
+            var filePath = Path.Combine(_options.FilesPath, newFileName);
 
             using var fileStream = File.Create(filePath);
 
