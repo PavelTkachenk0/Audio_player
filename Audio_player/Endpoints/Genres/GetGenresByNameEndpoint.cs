@@ -8,10 +8,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Audio_player.Endpoints.Genres;
 
-public class GetGenresByNameEndpoint(AppDbContext appDbContext, AutoMapper.IMapper mapper) : Endpoint<GetGenresByNameRequest, GetGenresResponse>
+public class GetGenresByNameEndpoint(AppDbContext appDbContext) : Endpoint<GetGenresByNameRequest, GetGenresResponse>
 {
     private readonly AppDbContext _appDbContext = appDbContext;
-    private readonly AutoMapper.IMapper _mapper = mapper;
 
     public override void Configure()
     {
@@ -26,11 +25,17 @@ public class GetGenresByNameEndpoint(AppDbContext appDbContext, AutoMapper.IMapp
 
         var genres = await _appDbContext.Genres
             .Where(x => EF.Functions.Like(x.Name, $"%{name}%"))
+            .Select(x => new GenreDTO
+            {
+                CoverPath = x.CoverPath,
+                Id = x.Id,
+                Name = x.Name
+            })
             .ToListAsync(ct);
 
         return new GetGenresResponse
         {
-            Result = _mapper.Map<List<GenreDTO>>(genres)
+            Result = genres
         };
     }
 }
