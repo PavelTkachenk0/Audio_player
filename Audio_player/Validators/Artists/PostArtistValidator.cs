@@ -2,7 +2,7 @@
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
-namespace Audio_player.Validators.Files;
+namespace Audio_player.Validators.Artists;
 
 public class PostArtistValidator : BaseFileValidator<PostArtistRequest>
 {
@@ -11,9 +11,9 @@ public class PostArtistValidator : BaseFileValidator<PostArtistRequest>
         RuleFor(x => x.ArtistName)
             .NotEmpty();
 
-        RuleFor(x => x.GenreId)
-            .MustAsync(async (val, ct) => await DbContext.Genres.AnyAsync(x => x.Id == val, ct))
-            .WithMessage("genre_is_not_found");
+        RuleFor(x => x.GenreIds)
+            .MustAsync(async (val, ct) => await DbContext.Genres.CountAsync(g => val.Contains(g.Id), ct) == val.Count)
+            .WithMessage("one_or_more_genres_not_found");
 
         RuleFor(x => x.Cover)
             .Cascade(CascadeMode.Stop)

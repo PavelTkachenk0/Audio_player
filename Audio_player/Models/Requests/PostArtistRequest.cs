@@ -5,7 +5,8 @@ namespace Audio_player.Models.Requests;
 public class PostArtistRequest : BasePostImageRequest
 {
     public string ArtistName { get; set; } = null!;
-    public short GenreId { get; set; }
+    [FromForm]
+    public List<short> GenreIds { get; set; } = [];
     [FromForm(Name = "cover")]
     public IFormFile Cover { get; set; } = null!;
 

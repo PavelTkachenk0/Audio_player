@@ -1,7 +1,7 @@
 ﻿using Audio_player.Models.Requests;
 using FluentValidation;
 
-namespace Audio_player.Validators.Files;
+namespace Audio_player.Validators;
 
 public abstract class BaseFileValidator<TRequest> : BaseValidator<TRequest>
     where TRequest : class
