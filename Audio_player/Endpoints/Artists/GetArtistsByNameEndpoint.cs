@@ -22,14 +22,13 @@ public class GetArtistsByNameEndpoint(AppDbContext appDbContext) : Endpoint<GetA
 
     public override async Task<GetArtistsResponse> ExecuteAsync(GetArtistByNameRequest req, CancellationToken ct)
     {
-        var name = req.Name?.ToLower();
-
         var artists = await _appDbContext.Artists
-            .Where(x => EF.Functions.Like(x.ArtistName, $"%{name}%"))
+            .Where(x => EF.Functions.ILike(x.ArtistName, $"%{req.Name}%"))
             .Select(x => new ArtistDTO
             {
                 ArtistName = x.ArtistName,
                 CoverPath = x.CoverPath,
+                AvatarPath = x.AvatarPath,
                 Genres = x.Genres.Select(x => new ShortGenreDTO
                 {
                     Id = x.Id,

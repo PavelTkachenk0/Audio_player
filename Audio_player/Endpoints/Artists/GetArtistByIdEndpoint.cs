@@ -26,6 +26,7 @@ public class GetArtistByIdEndpoint(AppDbContext appDbContext) : EndpointWithoutR
         {
             ArtistName = x.ArtistName,
             CoverPath = x.CoverPath,
+            AvatarPath = x.AvatarPath,
             Id = x.Id,
             Genres = x.Genres.Select(x => new ShortGenreDTO
             {

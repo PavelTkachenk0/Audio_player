@@ -3,11 +3,19 @@ using FluentValidation;
 
 namespace Audio_player.Validators.Files;
 
-public class PostGenreValidator : BasePostImageValidator<CreateGenreRequest>
+public class PostGenreValidator : BaseFileValidator<CreateGenreRequest>
 {
     public PostGenreValidator() : base()
     {
         RuleFor(x => x.Name)
             .NotEmpty();
+
+        RuleFor(x => x.Cover)
+            .Cascade(CascadeMode.Stop)
+            .NotEmpty()
+            .Must(CheckExtensions)
+            .WithMessage("incorrect_file_extension")
+            .Must(CheckFilesLenght)
+            .WithMessage("cover_is_too_large");
     }
 }

@@ -1,6 +1,10 @@
-﻿namespace Audio_player.Models.Requests;
+﻿using Microsoft.AspNetCore.Mvc;
 
-public class CreateGenreRequest : BasePostImageRequest
+namespace Audio_player.Models.Requests;
+
+public class CreateGenreRequest 
 {
     public string Name { get; set; } = null!;
+    [FromForm(Name = "cover")]
+    public IFormFile Cover { get; set; } = null!;
 }

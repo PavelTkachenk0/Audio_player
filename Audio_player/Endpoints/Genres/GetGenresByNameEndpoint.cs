@@ -21,10 +21,8 @@ public class GetGenresByNameEndpoint(AppDbContext appDbContext) : Endpoint<GetGe
 
     public override async Task<GetGenresResponse> ExecuteAsync(GetGenresByNameRequest req, CancellationToken ct)
     {
-        var name = req.Name?.ToLower();
-
         var genres = await _appDbContext.Genres
-            .Where(x => EF.Functions.Like(x.Name, $"%{name}%"))
+            .Where(x => EF.Functions.ILike(x.Name, $"%{req.Name}%"))
             .Select(x => new GenreDTO
             {
                 CoverPath = x.CoverPath,
