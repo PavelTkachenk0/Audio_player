@@ -33,7 +33,7 @@ public class PutGenreEndpoint(AppDbContext appDbContext, IOptionsSnapshot<ImageS
             return;
         }
 
-        genre.Name = req.Name.ToLower();
+        genre.Name = req.Name;
 
         if (!Directory.Exists(_options.FilesPath))
         {

@@ -43,7 +43,7 @@ public class PostGenreEndpoint(AppDbContext appDbContext, IOptionsSnapshot<Image
 
             _appDbContext.Genres.Add(new DAL.Models.Genre
             {
-                Name = req.Name.ToLower(),
+                Name = req.Name,
                 CoverPath = filePath
             });
         }
