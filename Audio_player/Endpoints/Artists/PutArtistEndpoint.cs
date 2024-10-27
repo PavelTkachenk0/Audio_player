@@ -27,7 +27,7 @@ public class PutArtistEndpoint(AppDbContext appDbContext,
 
     public override async Task HandleAsync(PutArtistRequest req, CancellationToken ct)
     {
-        var id = Route<short>("id");
+        var id = Route<long>("id");
 
         var artist = await _appDbContext.Artists
             .Include(x => x.GenreArtists)
