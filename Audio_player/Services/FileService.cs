@@ -20,4 +20,12 @@ public class FileService(AppDbContext appDbContext, IOptionsSnapshot<ImageStoreO
 
         return filePath;
     }
+
+    public void DeleteFile(string filePath)
+    {
+        if (File.Exists(filePath))
+        {
+            File.Delete(filePath);
+        }
+    }
 }
