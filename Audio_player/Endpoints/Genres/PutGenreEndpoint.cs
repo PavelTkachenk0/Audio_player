@@ -2,16 +2,19 @@
 using Audio_player.Constants;
 using Audio_player.DAL;
 using Audio_player.Models.Requests;
+using Audio_player.Services;
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 namespace Audio_player.Endpoints.Genres;
 
-public class PutGenreEndpoint(AppDbContext appDbContext, IOptionsSnapshot<ImageStoreOptions> optionsSnapshot) : Endpoint<EditGenreRequest>
+public class PutGenreEndpoint(AppDbContext appDbContext, 
+    IOptionsSnapshot<ImageStoreOptions> optionsSnapshot, FileService fileService) : Endpoint<EditGenreRequest>
 {
     private readonly AppDbContext _appDbContext = appDbContext;
     private readonly ImageStoreOptions _options = optionsSnapshot.Value;
+    private readonly FileService _fileService = fileService;
 
     public override void Configure()
     {
@@ -40,16 +43,11 @@ public class PutGenreEndpoint(AppDbContext appDbContext, IOptionsSnapshot<ImageS
             Directory.CreateDirectory(_options.FilesPath);
         }
 
-        foreach (var file in Files)
+        if (req.Cover != null)
         {
-            var newFileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName).ToLower();
-            var filePath = Path.Combine(_options.FilesPath, newFileName);
+            var coverPath = await _fileService.CreateFile(req.Cover, ct);
 
-            using var fileStream = File.Create(filePath);
-
-            await file.CopyToAsync(fileStream, ct);
-
-            genre.CoverPath = filePath;
+            genre.CoverPath = coverPath;
         }
 
         _appDbContext.Genres.Update(genre);

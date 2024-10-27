@@ -4,6 +4,7 @@ using Audio_player.DAL;
 using Audio_player.Helpers;
 using Audio_player.Hubs;
 using Audio_player.Middlewares;
+using Audio_player.Services;
 using FastEndpoints;
 using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -107,6 +108,8 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
     services.AddSignalR();
 
     services.AddScoped<GenerateTokenService>();
+
+    services.AddScoped<FileService>();
 
     services.AddOptions<ImageStoreOptions>().BindConfiguration("ImageStore");
 
