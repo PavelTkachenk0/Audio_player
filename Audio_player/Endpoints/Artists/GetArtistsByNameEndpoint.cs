@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Audio_player.Endpoints.Artists;
 
-public class GetArtistsByNameEndpoint(AppDbContext appDbContext) : Endpoint<GetArtistByNameRequest, GetArtistsResponse>
+public class GetArtistsByNameEndpoint(AppDbContext appDbContext) : Endpoint<GetByNameRequest, GetArtistsResponse>
 {
     private readonly AppDbContext _appDbContext = appDbContext;
 
@@ -20,7 +20,7 @@ public class GetArtistsByNameEndpoint(AppDbContext appDbContext) : Endpoint<GetA
         Policies(PolicyNames.HasAdminOrUserRole);
     }
 
-    public override async Task<GetArtistsResponse> ExecuteAsync(GetArtistByNameRequest req, CancellationToken ct)
+    public override async Task<GetArtistsResponse> ExecuteAsync(GetByNameRequest req, CancellationToken ct)
     {
         var artists = await _appDbContext.Artists
             .Where(x => EF.Functions.ILike(x.ArtistName, $"%{req.Name}%"))
