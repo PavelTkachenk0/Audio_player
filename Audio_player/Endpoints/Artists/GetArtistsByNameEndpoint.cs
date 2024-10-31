@@ -24,7 +24,7 @@ public class GetArtistsByNameEndpoint(AppDbContext appDbContext) : Endpoint<GetB
     public override async Task<GetArtistsResponse> ExecuteAsync(GetByNameRequest req, CancellationToken ct)
     {
         var email = HttpContext.User.Claims.
-           FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value!;
+           FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value!;
         var userId = await _appDbContext.AppUsers.Where(x => x.Email == email)
                 .Select(x => x.UserProfile!.Id)
                 .SingleOrDefaultAsync(ct);

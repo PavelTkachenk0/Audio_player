@@ -25,7 +25,7 @@ public class GetArtistByIdEndpoint(AppDbContext appDbContext) : EndpointWithoutR
         var id = Route<long>("id");
 
         var email = HttpContext.User.Claims.
-            FirstOrDefault(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value!;
+            FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value!;
         var userId = await _appDbContext.AppUsers.Where(x => x.Email == email)
                 .Select(x => x.UserProfile!.Id)
                 .SingleOrDefaultAsync(ct);
