@@ -9,7 +9,7 @@ using System.Security.Claims;
 
 namespace Audio_player.Endpoints.Albums;
 
-public class GetAlbumByNameEndpoint(AppDbContext appDbContext) : Endpoint<GetByNameRequest, GetAlbumsResponse>
+public class GetAlbumsByNameEndpoint(AppDbContext appDbContext) : Endpoint<GetByNameRequest, GetAlbumsResponse>
 {
     private readonly AppDbContext _appDbContext = appDbContext;
 
@@ -23,7 +23,7 @@ public class GetAlbumByNameEndpoint(AppDbContext appDbContext) : Endpoint<GetByN
     public override async Task<GetAlbumsResponse> ExecuteAsync(GetByNameRequest req, CancellationToken ct)
     {
         var email = HttpContext.User.Claims.
-          FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value!;
+          FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value!;
         var userId = await _appDbContext.AppUsers.Where(x => x.Email == email)
                 .Select(x => x.UserProfile!.Id)
                 .SingleOrDefaultAsync(ct);
