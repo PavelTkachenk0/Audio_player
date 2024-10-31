@@ -44,7 +44,8 @@ public class GetAlbumByNameEndpoint(AppDbContext appDbContext) : Endpoint<GetByN
                     ArtistName = x.ArtistName,
                     Id = x.Id,
                 }).ToList(),
-                Id = x.Id
+                Id = x.Id,
+                IsFavorite = x.UserAlbums.Any(x => x.UserId == userId),
             }).ToListAsync(ct);
 
         return new GetAlbumsResponse
