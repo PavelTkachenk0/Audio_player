@@ -2,8 +2,8 @@
 
 namespace Audio_player.Models.Requests;
 
-public class GetGenresByNameRequest
+public class GetByNameRequest
 {
     [QueryParam]
-    public string? Name { get; set; } 
+    public string? Name { get; set; }
 }

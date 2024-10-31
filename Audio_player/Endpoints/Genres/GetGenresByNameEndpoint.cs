@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Audio_player.Endpoints.Genres;
 
-public class GetGenresByNameEndpoint(AppDbContext appDbContext) : Endpoint<GetGenresByNameRequest, GetGenresResponse>
+public class GetGenresByNameEndpoint(AppDbContext appDbContext) : Endpoint<GetByNameRequest, GetGenresResponse>
 {
     private readonly AppDbContext _appDbContext = appDbContext;
 
@@ -19,7 +19,7 @@ public class GetGenresByNameEndpoint(AppDbContext appDbContext) : Endpoint<GetGe
         Policies(PolicyNames.HasAdminOrUserRole);
     }
 
-    public override async Task<GetGenresResponse> ExecuteAsync(GetGenresByNameRequest req, CancellationToken ct)
+    public override async Task<GetGenresResponse> ExecuteAsync(GetByNameRequest req, CancellationToken ct)
     {
         var genres = await _appDbContext.Genres
             .Where(x => EF.Functions.ILike(x.Name, $"%{req.Name}%"))
