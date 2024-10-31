@@ -6,6 +6,7 @@ using Audio_player.Models.Responses;
 using AutoMapper;
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace Audio_player.Endpoints.Artists;
 
@@ -23,7 +24,7 @@ public class GetArtistsByNameEndpoint(AppDbContext appDbContext) : Endpoint<GetB
     public override async Task<GetArtistsResponse> ExecuteAsync(GetByNameRequest req, CancellationToken ct)
     {
         var email = HttpContext.User.Claims.
-           FirstOrDefault(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value!;
+           FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value!;
         var userId = await _appDbContext.AppUsers.Where(x => x.Email == email)
                 .Select(x => x.UserProfile!.Id)
                 .SingleOrDefaultAsync(ct);
