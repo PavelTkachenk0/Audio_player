@@ -42,14 +42,13 @@ public class PostArtistEndpoint(IOptionsSnapshot<ImageStoreOptions> optionsSnaps
 
         await _appDbContext.SaveChangesAsync(ct);
 
-        foreach (var genreId in req.GenreIds)
-        {
-            _appDbContext.GenreArtists.Add(new DAL.Models.GenreArtist
+        _appDbContext.GenreArtists.AddRange(
+            req.GenreIds.Select(x => new DAL.Models.GenreArtist
             {
-                ArtistId = artist.Entity.Id,
-                GenreId = genreId,
-            });
-        }
+                GenreId = x,
+                ArtistId = artist.Entity.Id
+            })
+         );
 
         await _appDbContext.SaveChangesAsync(ct);
         await SendOkAsync(ct);

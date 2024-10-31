@@ -2,7 +2,7 @@
 
 namespace Audio_player.Models.Requests;
 
-public class PostArtistRequest : BasePostImageRequest
+public class PostArtistRequest 
 {
     public string ArtistName { get; set; } = null!;
     [FromForm]
