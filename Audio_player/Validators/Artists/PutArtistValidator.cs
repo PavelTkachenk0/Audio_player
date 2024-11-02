@@ -17,7 +17,6 @@ public class PutArtistValidator : BaseFileValidator<PutArtistRequest>
 
         RuleFor(x => x.Cover)
             .Cascade(CascadeMode.Stop)
-            .NotEmpty()
             .Must(CheckExtensions!).When(x => x.Cover != null)
             .WithMessage("incorrect_file_extension")
             .Must(CheckFilesLenght!).When(x => x.Cover != null)
@@ -25,7 +24,6 @@ public class PutArtistValidator : BaseFileValidator<PutArtistRequest>
 
         RuleFor(x => x.Avatar)
             .Cascade(CascadeMode.Stop)
-            .NotEmpty()
             .Must(CheckExtensions!).When(x => x.Avatar != null)
             .WithMessage("incorrect_file_extension")
             .Must(CheckFilesLenght!).When(x => x.Avatar != null)

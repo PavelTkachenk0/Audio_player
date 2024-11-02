@@ -1,0 +1,29 @@
+﻿using Audio_player.Models.Requests;
+using FluentValidation;
+using Microsoft.EntityFrameworkCore;
+
+namespace Audio_player.Validators.Albums;
+
+public class PutAlbumValidator : BaseFileValidator<PutAlbumRequest>
+{
+    public PutAlbumValidator() : base()
+    {
+        RuleFor(x => x.AlbumName)
+            .NotEmpty();
+
+        RuleFor(x => x.Cover)
+            .Cascade(CascadeMode.Stop)
+            .Must(CheckExtensions!).When(x => x.Cover != null)
+            .WithMessage("incorrect_file_extension")
+            .Must(CheckFilesLenght!).When(x => x.Cover != null)
+            .WithMessage("cover_is_too_large");
+
+        RuleFor(x => x.GenreIds)
+            .MustAsync(async (val, ct) => await DbContext.Genres.CountAsync(g => val.Contains(g.Id), ct) == val.Count)
+            .WithMessage("one_or_more_genres_not_found");
+
+        RuleFor(x => x.ArtistIds)
+            .MustAsync(async (val, ct) => await DbContext.Artists.CountAsync(a => val.Contains(a.Id), ct) == val.Count)
+            .WithMessage("one_or_more_artists_not_found");
+    }
+}
