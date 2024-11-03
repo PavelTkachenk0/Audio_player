@@ -2,14 +2,20 @@
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
-namespace Audio_player.Validators.Albums;
+namespace Audio_player.Validators.Tracks;
 
-public class PostAlbumValidator : BaseImageFileValidator<PostAlbumRequest>
+public class PostTrackValidator : BaseAudioFileValidator<PostTrackRequest>
 {
-    public PostAlbumValidator() : base()
+    public PostTrackValidator() : base()
     {
-        RuleFor(x => x.AlbumName)
+        RuleFor(x => x.SongName)
             .NotEmpty();
+
+        RuleFor(x => x.AlbumId)
+            .Cascade(CascadeMode.Stop)
+            .NotEmpty()
+            .MustAsync(async (val, ct) => await DbContext.Albums.AnyAsync(x => x.Id == val, ct))
+            .WithMessage("album_not_found");
 
         RuleFor(x => x.GenreIds)
             .Cascade(CascadeMode.Stop)
@@ -23,7 +29,7 @@ public class PostAlbumValidator : BaseImageFileValidator<PostAlbumRequest>
             .MustAsync(async (val, ct) => await DbContext.Artists.CountAsync(a => val.Contains(a.Id), ct) == val.Count)
             .WithMessage("one_or_more_artists_not_found");
 
-        RuleFor(x => x.Cover)
+        RuleFor(x => x.SongFile)
             .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .Must(CheckExtensions)

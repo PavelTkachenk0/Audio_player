@@ -1,14 +1,11 @@
-﻿using Audio_player.Models.Requests;
-using FluentValidation;
+﻿namespace Audio_player.Validators;
 
-namespace Audio_player.Validators;
-
-public abstract class BaseFileValidator<TRequest> : BaseValidator<TRequest>
+public abstract class BaseAudioFileValidator<TRequest> : BaseValidator<TRequest>
     where TRequest : class
 {
     protected virtual bool CheckExtensions(IFormFile file)
     {
-        var extensions = Configuration.GetSection("ImageStore:Extensions").Get<string[]>();
+        var extensions = Configuration.GetSection("AudioStore:Extensions").Get<string[]>();
 
         var success = extensions!.Contains(Path.GetExtension(file.FileName).ToLower());
 
@@ -17,7 +14,7 @@ public abstract class BaseFileValidator<TRequest> : BaseValidator<TRequest>
 
     protected virtual bool CheckFilesLenght(IFormFile file)
     {
-        var maxSize = Configuration.GetSection("ImageStore:MaxSize").Get<int>();
+        var maxSize = Configuration.GetSection("AudioStore:MaxSize").Get<int>();
 
         var success = maxSize > file.Length;
 

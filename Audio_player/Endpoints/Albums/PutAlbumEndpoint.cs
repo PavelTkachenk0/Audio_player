@@ -49,7 +49,7 @@ public class PutAlbumEndpoint(AppDbContext appDbContext,
 
         if (req.Cover != null)
         {
-            var coverPath = await _fileService.CreateFile(req.Cover, ct);
+            var coverPath = await _fileService.CreateFile(req.Cover, true, ct);
             album.CoverPath = coverPath;
         }
 

@@ -118,6 +118,8 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
     services.AddOptions<ImageStoreOptions>().BindConfiguration("ImageStore");
 
     services.AddOptions<AuthOptions>().BindConfiguration(nameof(AuthOptions));
+
+    services.AddOptions<AudioStoreOptions>().BindConfiguration("AudioStore");
 }
 
 static void ConfigureAuth(IServiceCollection services, IConfiguration configuration)
