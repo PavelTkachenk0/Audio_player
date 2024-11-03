@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Audio_player.Validators.Albums;
 
-public class PutAlbumValidator : BaseFileValidator<PutAlbumRequest>
+public class PutAlbumValidator : BaseImageFileValidator<PutAlbumRequest>
 {
     public PutAlbumValidator() : base()
     {

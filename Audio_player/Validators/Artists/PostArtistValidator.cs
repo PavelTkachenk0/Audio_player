@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Audio_player.Validators.Artists;
 
-public class PostArtistValidator : BaseFileValidator<PostArtistRequest>
+public class PostArtistValidator : BaseImageFileValidator<PostArtistRequest>
 {
     public PostArtistValidator() : base()
     {

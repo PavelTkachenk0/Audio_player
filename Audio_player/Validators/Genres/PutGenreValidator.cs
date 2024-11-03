@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace Audio_player.Validators.Genres;
 
-public class PutGenreValidator : BaseFileValidator<EditGenreRequest>
+public class PutGenreValidator : BaseImageFileValidator<EditGenreRequest>
 {
     public PutGenreValidator() : base()
     {
