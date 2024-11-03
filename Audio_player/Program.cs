@@ -3,6 +3,7 @@ using Audio_player.Constants;
 using Audio_player.DAL;
 using Audio_player.Helpers;
 using Audio_player.Hubs;
+using Audio_player.Jobs;
 using Audio_player.Middlewares;
 using Audio_player.Services;
 using FastEndpoints;
@@ -10,6 +11,7 @@ using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Quartz;
 using Serilog;
 using System.Security.Claims;
 
@@ -103,6 +105,8 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
 
     ConfigureAuth(services, configuration);
 
+    ConfigureQuartz(services, configuration);
+
     services.AddControllers();
 
     services.AddSignalR();
@@ -162,5 +166,44 @@ static void ConfigureAuth(IServiceCollection services, IConfiguration configurat
                 ? (c.User.IsInRole(Roles.Admin) || c.User.IsInRole(Roles.User))
                 : false);
         });
+    });
+}
+
+static void ConfigureQuartz(IServiceCollection services, IConfiguration configuration)
+{
+    var jobsSettings = new JobsSettingsOptions();
+
+    configuration.GetSection(nameof(JobsSettingsOptions)).Bind(jobsSettings);
+
+    services.AddSingleton(jobsSettings);
+
+    string triggerType = "-trigger";
+
+    var jobs = new List<(Type jobType, string jobKey, string triggerKey, string cronSchedule)>
+    {
+        (typeof(UpdateAccessTokensTableJob), nameof(UpdateAccessTokensTableJob), nameof(UpdateAccessTokensTableJob) + triggerType,  jobsSettings.UpdateAccessTokensTableJobSettings.CronScheduler),
+        (typeof(UpdateRefreshTokensTableJob), nameof(UpdateRefreshTokensTableJob), nameof(UpdateRefreshTokensTableJob) + triggerType, jobsSettings.UpdateRefreshTokensTableJobSettings.CronScheduler),
+        (typeof(CleanAccessTokensTableJob), nameof(CleanAccessTokensTableJob), nameof(CleanAccessTokensTableJob) + triggerType, jobsSettings.CleanAccessTokensTableJobSettings.CronScheduler)
+    };
+
+    services.AddQuartzHostedService(options =>
+    {
+        options.WaitForJobsToComplete = true;
+    });
+
+    services.AddQuartz(q =>
+    {
+        foreach (var job in jobs)
+        {
+            var jobKey = new JobKey(job.jobKey);
+
+            q.AddJob(job.jobType, null, opt => opt.WithIdentity(jobKey));
+
+            q.AddTrigger(opts => opts
+                .ForJob(jobKey)
+                .WithIdentity(job.triggerKey)
+                .WithCronSchedule(job.cronSchedule)
+            );
+        }
     });
 }
