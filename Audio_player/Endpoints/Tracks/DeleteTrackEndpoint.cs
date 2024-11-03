@@ -4,9 +4,9 @@ using Audio_player.Services;
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 
-namespace Audio_player.Endpoints.Albums;
+namespace Audio_player.Endpoints.Tracks;
 
-public class DeleteAlbumEndpoint(AppDbContext appDbContext, FileService fileService) : EndpointWithoutRequest
+public class DeleteTrackEndpoint(AppDbContext appDbContext, FileService fileService) : EndpointWithoutRequest
 {
     private readonly AppDbContext _appDbContext = appDbContext;
     private readonly FileService _fileService = fileService;
@@ -14,7 +14,7 @@ public class DeleteAlbumEndpoint(AppDbContext appDbContext, FileService fileServ
     public override void Configure()
     {
         Delete("{id:int}");
-        Group<AlbumGroup>();
+        Group<TrackGroup>();
         Policies(PolicyNames.HasAdminRole);
     }
 
@@ -22,19 +22,20 @@ public class DeleteAlbumEndpoint(AppDbContext appDbContext, FileService fileServ
     {
         var id = Route<long>("id");
 
-        var album = await _appDbContext.Albums.SingleOrDefaultAsync(x => x.Id == id, ct);
+        var track = await _appDbContext.Songs.SingleOrDefaultAsync(x => x.Id == id, ct);
 
-        if (album == null)
+        if (track == null)
         {
             await SendNotFoundAsync(ct);
             return;
         }
 
-        _appDbContext.Albums.Remove(album);
+        _appDbContext.Songs.Remove(track);
 
-        _fileService.DeleteFile(album.CoverPath);
+        _fileService.DeleteFile(track.SongPath);
 
         await _appDbContext.SaveChangesAsync(ct);
+
         await SendOkAsync(ct);
     }
 }
