@@ -48,13 +48,13 @@ public class PutArtistEndpoint(AppDbContext appDbContext,
 
         if (req.Cover != null)
         {
-            var coverPath = await _fileService.CreateFile(req.Cover, ct);
+            var coverPath = await _fileService.CreateFile(req.Cover, true, ct);
             artist.CoverPath = coverPath;
         }
 
         if (req.Avatar != null)
         {
-            var avatarPath = await _fileService.CreateFile(req.Avatar, ct);
+            var avatarPath = await _fileService.CreateFile(req.Avatar,true, ct);
             artist.AvatarPath = avatarPath;
         }
 

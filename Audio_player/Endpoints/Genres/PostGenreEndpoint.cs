@@ -30,7 +30,7 @@ public class PostGenreEndpoint(AppDbContext appDbContext,
             Directory.CreateDirectory(_options.FilesPath);
         }
 
-        var coverPath = await _fileService.CreateFile(req.Cover, ct);
+        var coverPath = await _fileService.CreateFile(req.Cover, true, ct);
 
         _appDbContext.Genres.Add(new DAL.Models.Genre
         {

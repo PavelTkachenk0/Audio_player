@@ -30,8 +30,8 @@ public class PostArtistEndpoint(IOptionsSnapshot<ImageStoreOptions> optionsSnaps
             Directory.CreateDirectory(_options.FilesPath);
         }
 
-        var coverPath = await _fileService.CreateFile(req.Cover, ct);
-        var avatarPath = await _fileService.CreateFile(req.Avatar, ct);
+        var coverPath = await _fileService.CreateFile(req.Cover, true, ct);
+        var avatarPath = await _fileService.CreateFile(req.Avatar, true, ct);
 
         var artist = _appDbContext.Artists.Add(new DAL.Models.Artist
         {

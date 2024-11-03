@@ -30,7 +30,7 @@ public class PostAlbumEndpoint(AppDbContext appDbContext,
             Directory.CreateDirectory(_options.FilesPath);
         }
 
-        var coverPath = await _fileService.CreateFile(req.Cover, ct);
+        var coverPath = await _fileService.CreateFile(req.Cover, true, ct);
 
         var album = _appDbContext.Albums.Add(new DAL.Models.Album
         {
