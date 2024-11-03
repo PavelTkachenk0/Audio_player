@@ -2,21 +2,20 @@
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
-namespace Audio_player.Validators.Albums;
+namespace Audio_player.Validators.Tracks;
 
-public class PutAlbumValidator : BaseImageFileValidator<PutAlbumRequest>
+public class PutTrackValidator : BaseAudioFileValidator<PutTrackRequest>
 {
-    public PutAlbumValidator() : base()
+    public PutTrackValidator() : base()
     {
-        RuleFor(x => x.AlbumName)
+        RuleFor(x => x.SongName)
             .NotEmpty();
 
-        RuleFor(x => x.Cover)
+        RuleFor(x => x.AlbumId)
             .Cascade(CascadeMode.Stop)
-            .Must(CheckExtensions!).When(x => x.Cover != null)
-            .WithMessage("incorrect_file_extension")
-            .Must(CheckFilesLenght!).When(x => x.Cover != null)
-            .WithMessage("cover_is_too_large");
+            .NotEmpty()
+            .MustAsync(async (val, ct) => await DbContext.Albums.AnyAsync(x => x.Id == val, ct))
+            .WithMessage("album_not_found");
 
         RuleFor(x => x.GenreIds)
             .Cascade(CascadeMode.Stop)
@@ -29,5 +28,12 @@ public class PutAlbumValidator : BaseImageFileValidator<PutAlbumRequest>
             .NotEmpty()
             .MustAsync(async (val, ct) => await DbContext.Artists.CountAsync(a => val.Contains(a.Id), ct) == val.Count)
             .WithMessage("one_or_more_artists_not_found");
+
+        RuleFor(x => x.SongFile)
+            .Cascade(CascadeMode.Stop)
+            .Must(CheckExtensions!).When(x => x.SongFile != null)
+            .WithMessage("incorrect_file_extension")
+            .Must(CheckFilesLenght!).When(x => x.SongFile != null)
+            .WithMessage("cover_is_too_large");
     }
 }

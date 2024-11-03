@@ -12,6 +12,8 @@ public class PutArtistValidator : BaseImageFileValidator<PutArtistRequest>
             .NotEmpty();
 
         RuleFor(x => x.GenreIds)
+            .Cascade(CascadeMode.Stop)
+            .NotEmpty()
             .MustAsync(async (val, ct) => await DbContext.Genres.CountAsync(g => val.Contains(g.Id), ct) == val.Count)
             .WithMessage("one_or_more_genres_not_found");
 
