@@ -11,7 +11,7 @@ public class UpdateAccessTokensTableJob(AppDbContext appDbContext) : IJob
 
     public async Task Execute(IJobExecutionContext context)
     {
-        await JobSynchronizationHelper.RunWithLock(async () =>
+        await JobSynchronizationHelper.RunAccessTokensTableJobsWithLock(async () =>
         {
             var tokens = _appDbContext.AccessTokens.Where(x => x.ExpiryDate < DateTime.UtcNow && !x.IsRevoked);
 

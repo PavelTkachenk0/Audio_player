@@ -2,11 +2,11 @@
 
 public class JobSynchronizationHelper
 {
-    private static readonly SemaphoreSlim semaphore = new(1, 1);
+    private static readonly SemaphoreSlim accessTokenSemaphore = new(1, 1);
 
-    public static async Task RunWithLock(Func<Task> jobFunction)
+    public static async Task RunAccessTokensTableJobsWithLock(Func<Task> jobFunction)
     {
-        await semaphore.WaitAsync();
+        await accessTokenSemaphore.WaitAsync();
 
         try
         {
@@ -14,7 +14,7 @@ public class JobSynchronizationHelper
         }
         finally
         {
-            semaphore.Release();
+            accessTokenSemaphore.Release();
         }
     }
 }
