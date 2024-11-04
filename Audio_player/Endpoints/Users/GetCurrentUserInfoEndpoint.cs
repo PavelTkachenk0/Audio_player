@@ -3,38 +3,34 @@ using Audio_player.DAL;
 using Audio_player.Models.DTOs;
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace Audio_player.Endpoints.Users;
 
-public class GetUserByIdEndpoint(AppDbContext appDbContext) : EndpointWithoutRequest<UserDTO?>
+public class GetCurrentUserInfoEndpoint(AppDbContext appDbContext) : EndpointWithoutRequest<UserDTO>
 {
     private readonly AppDbContext _appDbContext = appDbContext;
 
     public override void Configure()
     {
-        Get("{id:int}");
+        Get("me");
         Group<UserGroup>();
-        Policies(PolicyNames.HasAdminRole);
+        Policies(PolicyNames.HasAdminOrUserRole);
     }
 
-    public override async Task<UserDTO?> ExecuteAsync(CancellationToken ct)
+    public override async Task<UserDTO> ExecuteAsync(CancellationToken ct)
     {
-        var id = Route<long>("id");
+        var email = HttpContext.User.Claims.
+         FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value!;
 
         var user = await _appDbContext.AppUsers.Select(x => new UserDTO
         {
-            Id = x.Id,
             Email = x.Email,
+            Id = x.Id,
             Birthday = x.UserProfile!.Birthdate,
-            Surname = x.UserProfile!.Surname,
             Name = x.UserProfile!.Name,
-        }).SingleOrDefaultAsync(x => x.Id == id, ct);
-
-        if (user == null)
-        {
-            await SendNotFoundAsync(ct);
-            return null;
-        }
+            Surname = x.UserProfile!.Surname,
+        }).SingleAsync(x => x.Email == email, ct);
 
         return user;
     }
