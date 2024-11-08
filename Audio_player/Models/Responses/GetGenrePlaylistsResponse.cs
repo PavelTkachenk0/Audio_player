@@ -2,4 +2,4 @@
 
 namespace Audio_player.Models.Responses;
 
-public class GetGenrePlaylistsResponse : BaseListResponse<GenrePlaylistDTO>;
+public class GetGenrePlaylistsResponse : BaseListResponse<ShortGenrePlaylistDTO>;

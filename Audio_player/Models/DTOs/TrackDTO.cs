@@ -5,7 +5,7 @@ public class TrackDTO : TrackByAlbumIdDTO
     public ShortAlbumDTO Album { get; set; } = null!;
     public List<ShortGenreDTO> Genres { get; set; } = [];
 }
-
+    
 public class TrackByAlbumIdDTO
 {
     public long Id { get; set; }
@@ -15,4 +15,9 @@ public class TrackByAlbumIdDTO
     public int Duration { get; set; }
     public bool IsFavorite { get; set; }
     public List<ShortArtistDTO> Artists { get; set; } = [];
+}
+
+public class TrackForPlaylistDTO : TrackByAlbumIdDTO
+{
+    public string CoverPath { get; set; } = null!;
 }
