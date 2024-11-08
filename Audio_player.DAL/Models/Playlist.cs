@@ -7,6 +7,7 @@ public class Playlist : BaseEntity<long>
 {
     public string Name { get; set; } = null!;
     public string CoverPath { get; set; } = null!;
+    public bool IsAdmin { get; set; }
     public ICollection<UserProfile> Users { get; set; } = new HashSet<UserProfile>();
     public ICollection<UserPlaylist> UserPlaylists { get; set; } = new HashSet<UserPlaylist>();
     public ICollection<Song> Songs { get; set; } = new HashSet<Song>();
@@ -18,6 +19,7 @@ public class PlaylistConfig : IEntityTypeConfiguration<Playlist>
     public void Configure(EntityTypeBuilder<Playlist> builder)
     {
         builder.Property(x => x.Name).HasMaxLength(100);
+        builder.Property(x => x.IsAdmin).HasDefaultValue(false);
 
         builder.HasMany(x => x.Songs)
             .WithMany(x => x.Playlists)
