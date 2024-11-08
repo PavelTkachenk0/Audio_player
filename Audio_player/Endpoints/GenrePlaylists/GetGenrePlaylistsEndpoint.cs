@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Audio_player.Endpoints.GenrePlaylists;
 
-public class GetGenrePlaylists(AppDbContext appDbContext) : EndpointWithoutRequest<GetGenrePlaylistsResponse>
+public class GetGenrePlaylistsEndpoint(AppDbContext appDbContext) : EndpointWithoutRequest<GetGenrePlaylistsResponse>
 {
     private readonly AppDbContext _appDbContext = appDbContext;
 
@@ -20,7 +20,7 @@ public class GetGenrePlaylists(AppDbContext appDbContext) : EndpointWithoutReque
 
     public override async Task<GetGenrePlaylistsResponse> ExecuteAsync(CancellationToken ct)
     {
-        var playlists = await _appDbContext.Playlists.Where(x => x.IsAdmin).Select(x => new GenrePlaylistDTO
+        var playlists = await _appDbContext.Playlists.Where(x => x.IsAdmin).Select(x => new ShortGenrePlaylistDTO
         {
             CoverPath = x.CoverPath,
             Id = x.Id,
