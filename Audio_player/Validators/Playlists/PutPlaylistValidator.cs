@@ -4,19 +4,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Audio_player.Validators.Playlists;
 
-public class PostPlaylistValidator : BaseImageFileValidator<PostPlaylistRequest>
+public class PutPlaylistValidator : BaseImageFileValidator<PutPlaylistRequest>
 {
-    public PostPlaylistValidator() : base()
+    public PutPlaylistValidator() : base()
     {
         RuleFor(x => x.Name)
             .NotEmpty();
 
         RuleFor(x => x.Cover)
             .Cascade(CascadeMode.Stop)
-            .NotEmpty()
-            .Must(CheckExtensions)
+            .Must(CheckExtensions!).When(x => x.Cover != null)
             .WithMessage("incorrect_file_extension")
-            .Must(CheckFilesLenght)
+            .Must(CheckFilesLenght!).When(x => x.Cover != null)
             .WithMessage("cover_is_too_large");
 
         RuleFor(x => x.TrackIds)
