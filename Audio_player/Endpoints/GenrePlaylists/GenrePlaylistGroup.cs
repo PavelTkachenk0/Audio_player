@@ -6,6 +6,6 @@ public class GenrePlaylistGroup : Group
 {
     public GenrePlaylistGroup()
     {
-        Configure("genrePlaylists", ep => { });
+        Configure("genre-playlists", ep => { });
     }
 }
