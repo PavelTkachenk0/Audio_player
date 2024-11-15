@@ -8,7 +8,6 @@ public class UserPlaylist
     public long UserId { get; set; }
     public long PlaylistId { get; set; }
     public bool Own {  get; set; }
-    public bool IsAdmin { get; set; }
     public Playlist? Playlist { get; set; }
     public UserProfile? User {  get; set; }
 }
@@ -20,6 +19,5 @@ public class UserPlaylistConfig : IEntityTypeConfiguration<UserPlaylist>
         builder.HasKey(x => new { x.UserId, x.PlaylistId });
 
         builder.Property(x => x.Own).HasDefaultValue(false);
-        builder.Property(x => x.IsAdmin).HasDefaultValue(false);
     }
 }
