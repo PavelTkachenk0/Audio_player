@@ -9,7 +9,7 @@ using System.Security.Claims;
 
 namespace Audio_player.Endpoints.Recommendations;
 
-public class GetRecommendationArtistEndpoint(AppDbContext appDbContext) : Endpoint<RecommendationRequest, GetRecommendationArtistsResponse>
+public class GetRecommendationArtistsEndpoint(AppDbContext appDbContext) : Endpoint<RecommendationRequest, GetRecommendationArtistsResponse>
 {
     private readonly AppDbContext _appDbContext = appDbContext;
 
