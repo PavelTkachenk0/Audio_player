@@ -1,9 +1,11 @@
 ﻿using Audio_player.DAL;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Audio_player.Hubs;
 
+[AllowAnonymous]
 public class AudioHub(AppDbContext appDbContext, IWebHostEnvironment webHostEnvironment) : Hub
 {
     private readonly AppDbContext _appDbContext = appDbContext;

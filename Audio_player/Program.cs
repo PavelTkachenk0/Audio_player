@@ -62,7 +62,7 @@ try
 
     app.UseAuthorization();
 
-    app.MapHub<AudioHub>("/audioHub");
+    app.MapHub<AudioHub>("/audioHub").AllowAnonymous();
 
     app.MapDefaultControllerRoute();
 
