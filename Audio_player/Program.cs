@@ -109,8 +109,7 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
 
     services.AddControllers();
 
-    services.AddSignalR()
-           .AddMessagePackProtocol();
+    services.AddSignalR();
 
     services.AddScoped<GenerateTokenService>();
 
