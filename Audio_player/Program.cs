@@ -62,7 +62,7 @@ try
 
     app.UseAuthorization();
 
-    app.MapHub<AudioHub>("/audioHub");
+    app.MapHub<AudioHub>("/audioHub").AllowAnonymous();
 
     app.MapDefaultControllerRoute();
 
@@ -109,7 +109,8 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
 
     services.AddControllers();
 
-    services.AddSignalR();
+    services.AddSignalR()
+           .AddMessagePackProtocol();
 
     services.AddScoped<GenerateTokenService>();
 
