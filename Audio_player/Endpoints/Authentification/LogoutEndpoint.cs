@@ -6,9 +6,9 @@ using System.IdentityModel.Tokens.Jwt;
 
 namespace Audio_player.Endpoints.Authentification;
 
-public class LogoutEndpoint(AppDbContext appDbContext, GenerateTokenHelper tokenHelper) : EndpointWithoutRequest
+public class LogoutEndpoint(AppDbContext appDbContext, GenerateTokenService tokenService) : EndpointWithoutRequest
 {
-    private readonly GenerateTokenHelper _tokenHelper = tokenHelper;
+    private readonly GenerateTokenService _tokenService = tokenService;
     private readonly AppDbContext _appDbContext = appDbContext;
 
     public override void Configure()
@@ -38,7 +38,7 @@ public class LogoutEndpoint(AppDbContext appDbContext, GenerateTokenHelper token
             var jwtToken = handler.ReadJwtToken(accessToken);
             var jti = jwtToken.Claims.First(x => x.Type == JwtRegisteredClaimNames.Jti).Value;
 
-            await _tokenHelper.RevokeAccessTokenAsync(jti, ct);
+            await _tokenService.RevokeAccessTokenAsync(jti, ct);
         }
 
         HttpContext.Response.Cookies.Delete("refreshToken");

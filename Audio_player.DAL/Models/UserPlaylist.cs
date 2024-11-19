@@ -17,5 +17,7 @@ public class UserPlaylistConfig : IEntityTypeConfiguration<UserPlaylist>
     public void Configure(EntityTypeBuilder<UserPlaylist> builder)
     {
         builder.HasKey(x => new { x.UserId, x.PlaylistId });
+
+        builder.Property(x => x.Own).HasDefaultValue(false);
     }
 }

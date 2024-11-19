@@ -118,6 +118,9 @@ namespace Audio_player.DAL.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Email")
+                        .IsUnique();
+
                     b.ToTable("AppUsers");
                 });
 
@@ -156,6 +159,10 @@ namespace Audio_player.DAL.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
+
+                    b.Property<string>("AvatarPath")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("CoverPath")
                         .IsRequired()
@@ -298,6 +305,15 @@ namespace Audio_player.DAL.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
+                    b.Property<string>("CoverPath")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsAdmin")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -320,7 +336,7 @@ namespace Audio_player.DAL.Migrations
 
                     b.HasIndex("SongId");
 
-                    b.ToTable("PlaylistSong");
+                    b.ToTable("PlaylistSongs");
                 });
 
             modelBuilder.Entity("Audio_player.DAL.Models.RefreshToken", b =>
@@ -364,6 +380,9 @@ namespace Audio_player.DAL.Migrations
 
                     b.Property<long>("AlbumId")
                         .HasColumnType("bigint");
+
+                    b.Property<int>("Duration")
+                        .HasColumnType("integer");
 
                     b.Property<long>("ListeningCount")
                         .HasColumnType("bigint");
@@ -423,7 +442,9 @@ namespace Audio_player.DAL.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<bool>("Own")
-                        .HasColumnType("boolean");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
 
                     b.HasKey("UserId", "PlaylistId");
 

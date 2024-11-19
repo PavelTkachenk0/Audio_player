@@ -7,6 +7,7 @@ public class Artist : BaseEntity<long>
 {
     public string ArtistName { get; set; } = null!;
     public string CoverPath { get; set; } = null!;
+    public string AvatarPath { get; set; } = null!;
     public ICollection<Album> Albums { get; set; } = new HashSet<Album>();
     public ICollection<ArtistAlbum> ArtistAlbums { get; set; } = new HashSet<ArtistAlbum>();
     public ICollection<Song> Songs { get; set; } = new HashSet<Song>();

@@ -23,6 +23,8 @@ public class AppUserConfig : IEntityTypeConfiguration<AppUser>
         builder.Property(x => x.Password).HasMaxLength(255);
         builder.Property(x => x.IsTwoFactorEnabled).HasDefaultValue(false);
 
+        builder.HasIndex(x => x.Email).IsUnique();
+
         builder.HasMany(x => x.Roles)
             .WithMany(x => x.Users)
             .UsingEntity<AppUserRole>(

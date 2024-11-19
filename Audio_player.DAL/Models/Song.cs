@@ -9,6 +9,7 @@ public class Song : BaseEntity<long>
     public string SongPath { get; set; } = null!; 
     public long AlbumId { get; set; }
     public long ListeningCount { get; set; }
+    public int Duration { get; set; }
     public ICollection<UserSongs> UserSongs { get; set; } = new HashSet<UserSongs>();
     public ICollection<UserProfile> Users { get; set; } = new HashSet<UserProfile>();
     public Album? Album { get; set; }

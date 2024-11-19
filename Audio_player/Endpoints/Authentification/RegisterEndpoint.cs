@@ -1,19 +1,15 @@
-﻿using Audio_player.AppSettingsOptions;
-using Audio_player.DAL;
+﻿using Audio_player.DAL;
+using Audio_player.DAL.Models;
 using Audio_player.Helpers;
 using Audio_player.Models.Requests;
 using Audio_player.Models.Responses;
 using FastEndpoints;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 
 namespace Audio_player.Endpoints.Authentification;
 
-public class RegisterEndpoint(AppDbContext appDbContext, GenerateTokenHelper tokenHelper) : Endpoint<RegisterRequest, TokenResponse>
+public class RegisterEndpoint(AppDbContext appDbContext, GenerateTokenService tokenService) : Endpoint<RegisterRequest, TokenResponse>
 {
-    private readonly GenerateTokenHelper _tokenHelper = tokenHelper;
+    private readonly GenerateTokenService _tokenService = tokenService;
     private readonly AppDbContext _appDbContext = appDbContext;
 
     public override void Configure()
@@ -34,14 +30,21 @@ public class RegisterEndpoint(AppDbContext appDbContext, GenerateTokenHelper tok
                 Birthdate = req.Birthday,
                 Name = req.Name,
                 Surname = req.Surname
-            }
+            }, 
+            UserRoles = 
+            [
+                new AppUserRole
+                {
+                    RoleId = 1
+                }
+            ]
         });
 
         await _appDbContext.SaveChangesAsync(ct);
 
-        var accessToken = await _tokenHelper.GenerateAccessToken(user.Entity.Email, ct);
+        var accessToken = await _tokenService.GenerateAccessToken(user.Entity.Email, ct);
 
-        await _tokenHelper.SetRefreshTokenCookieAsync(HttpContext.Response, user.Entity.Email, ct);
+        await _tokenService.SetRefreshTokenCookieAsync(HttpContext.Response, user.Entity.Email, ct);
 
         return new TokenResponse
         {

@@ -12,9 +12,9 @@ using System.Security.Claims;
 
 namespace Audio_player.Endpoints.Authentification;
 
-public class LoginEndpoint(AppDbContext appDbContext, GenerateTokenHelper tokenHelper) : Endpoint<LoginRequest, TokenResponse>
+public class LoginEndpoint(AppDbContext appDbContext, GenerateTokenService tokenService) : Endpoint<LoginRequest, TokenResponse>
 {
-    private readonly GenerateTokenHelper _tokenHelper = tokenHelper;
+    private readonly GenerateTokenService _tokenService = tokenService;
     private readonly AppDbContext _appDbContext = appDbContext;
 
     public override void Configure()
@@ -28,9 +28,9 @@ public class LoginEndpoint(AppDbContext appDbContext, GenerateTokenHelper tokenH
     {
         var user = await _appDbContext.AppUsers.SingleAsync(x => x.Email == req.Email, ct);
 
-        var accessToken = await _tokenHelper.GenerateAccessToken(user.Email, ct);
+        var accessToken = await _tokenService.GenerateAccessToken(user.Email, ct);
 
-        await _tokenHelper.SetRefreshTokenCookieAsync(HttpContext.Response, user.Email, ct);
+        await _tokenService.SetRefreshTokenCookieAsync(HttpContext.Response, user.Email, ct);
 
         return new TokenResponse
         {
