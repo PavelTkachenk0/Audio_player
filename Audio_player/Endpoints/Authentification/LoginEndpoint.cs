@@ -1,14 +1,9 @@
-﻿using Audio_player.AppSettingsOptions;
-using Audio_player.DAL;
+﻿using Audio_player.DAL;
 using Audio_player.Helpers;
 using Audio_player.Models.Requests;
 using Audio_player.Models.Responses;
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 
 namespace Audio_player.Endpoints.Authentification;
 
@@ -26,7 +21,13 @@ public class LoginEndpoint(AppDbContext appDbContext, GenerateTokenService token
 
     public override async Task<TokenResponse> ExecuteAsync(LoginRequest req, CancellationToken ct)
     {
-        var user = await _appDbContext.AppUsers.SingleAsync(x => x.Email == req.Email, ct);
+        var user = await _appDbContext.AppUsers.SingleOrDefaultAsync(x => x.Email == req.Email && x.Password == req.Password, ct);
+
+        if (user == null)
+        {
+            ThrowError("invalid_login_or_password");
+            await SendNotFoundAsync(ct);
+        }
 
         var accessToken = await _tokenService.GenerateAccessToken(user.Email, ct);
 
