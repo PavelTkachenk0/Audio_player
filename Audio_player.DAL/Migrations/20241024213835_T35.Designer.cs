@@ -3,6 +3,7 @@ using System;
 using Audio_player.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Audio_player.DAL.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241024213835_T35")]
+    partial class T35
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -106,7 +109,7 @@ namespace Audio_player.DAL.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
-                    b.Property<bool>("IsTwoFactorEnable")
+                    b.Property<bool>("IsTwoFactorEnabled")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
                         .HasDefaultValue(false);
@@ -116,13 +119,7 @@ namespace Audio_player.DAL.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
-                    b.Property<string>("TwoFactorSecret")
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("Email")
-                        .IsUnique();
 
                     b.ToTable("AppUsers");
                 });
@@ -162,10 +159,6 @@ namespace Audio_player.DAL.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
-
-                    b.Property<string>("AvatarPath")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<string>("CoverPath")
                         .IsRequired()
@@ -308,15 +301,6 @@ namespace Audio_player.DAL.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<string>("CoverPath")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<bool>("IsAdmin")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false);
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -339,7 +323,7 @@ namespace Audio_player.DAL.Migrations
 
                     b.HasIndex("SongId");
 
-                    b.ToTable("PlaylistSongs");
+                    b.ToTable("PlaylistSong");
                 });
 
             modelBuilder.Entity("Audio_player.DAL.Models.RefreshToken", b =>
@@ -383,9 +367,6 @@ namespace Audio_player.DAL.Migrations
 
                     b.Property<long>("AlbumId")
                         .HasColumnType("bigint");
-
-                    b.Property<int>("Duration")
-                        .HasColumnType("integer");
 
                     b.Property<long>("ListeningCount")
                         .HasColumnType("bigint");
@@ -445,9 +426,7 @@ namespace Audio_player.DAL.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<bool>("Own")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false);
+                        .HasColumnType("boolean");
 
                     b.HasKey("UserId", "PlaylistId");
 
