@@ -7,7 +7,8 @@ public class AppUser : BaseEntity<long>
 {
     public string Email { get; set; } = null!;
     public string Password { get; set; } = null!; 
-    public bool IsTwoFactorEnabled { get; set; }
+    public bool IsTwoFactorEnable { get; set; }
+    public string? TwoFactorSecret { get; set; } 
     public ICollection<AppRole> Roles { get; set; } = new HashSet<AppRole>();
     public ICollection<AppUserRole> UserRoles { get; set; } = new HashSet<AppUserRole>();  
     public UserProfile? UserProfile { get; set; }
@@ -21,7 +22,7 @@ public class AppUserConfig : IEntityTypeConfiguration<AppUser>
     {
         builder.Property(x => x.Email).HasMaxLength(255);
         builder.Property(x => x.Password).HasMaxLength(255);
-        builder.Property(x => x.IsTwoFactorEnabled).HasDefaultValue(false);
+        builder.Property(x => x.IsTwoFactorEnable).HasDefaultValue(false);
 
         builder.HasIndex(x => x.Email).IsUnique();
 
