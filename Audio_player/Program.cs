@@ -115,11 +115,7 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
 
     services.AddScoped<FileService>();
 
-    services.AddOptions<ImageStoreOptions>().BindConfiguration("ImageStore");
-
-    services.AddOptions<AuthOptions>().BindConfiguration(nameof(AuthOptions));
-
-    services.AddOptions<AudioStoreOptions>().BindConfiguration("AudioStore");
+    ConfigureAppSettings(services, configuration);
 }
 
 static void ConfigureAuth(IServiceCollection services, IConfiguration configuration)
@@ -208,4 +204,14 @@ static void ConfigureQuartz(IServiceCollection services, IConfiguration configur
             );
         }
     });
+}
+
+static void ConfigureAppSettings(IServiceCollection services, IConfiguration configuration)
+{
+
+    services.AddOptions<ImageStoreOptions>().BindConfiguration("ImageStore");
+
+    services.AddOptions<AuthOptions>().BindConfiguration(nameof(AuthOptions));
+
+    services.AddOptions<AudioStoreOptions>().BindConfiguration("AudioStore");
 }
