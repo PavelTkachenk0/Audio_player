@@ -44,7 +44,7 @@ public class SearchEndpoint(AppDbContext appDbContext) : Endpoint<SearchTermRequ
                                 {
                                     Id = ar.Id,
                                     Source = nameof(Artist),
-                                    CoverPath = ar.CoverPath,
+                                    CoverPath = ar.AvatarPath,
                                     Name = ar.ArtistName
                                 })).ToListAsync(ct);
 
