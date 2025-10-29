@@ -41,7 +41,3 @@ To contribute:
 3. Commit your changes (`git commit -am 'Add new feature'`).
 4. Push your branch to your fork (`git push origin feature/YourFeature`).
 5. Open a Pull Request.
-
----
-
-Would you like me to make it a **bilingual version (English + Russian)** for your README so both local and international contributors can understand it easily?
