@@ -21,7 +21,7 @@ public class PostPlaylistToFavoriteEndpoint(AppDbContext appDbContext) : Endpoin
     {
         var playlistId = Route<long>("id");
 
-        if (!_appDbContext.Playlists.Any(x => x.Id == playlistId))
+        if (!await _appDbContext.Playlists.AnyAsync(x => x.Id == playlistId, ct))
         {
             await SendNotFoundAsync(ct);
             return new FavoriteResponse

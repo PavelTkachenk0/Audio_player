@@ -26,7 +26,7 @@ public class GetFavoriteAlbumsEndpoint(AppDbContext appDbContext) : EndpointWith
                 .SingleOrDefaultAsync(ct);
 
         var albums = await _appDbContext.Albums
-            .Where(x => x.UserAlbums.Select(us => us.AlbumId).Contains(x.Id))
+            .Where(x => x.UserAlbums.Any(us => us.UserId == userId))
             .Select(x => new AlbumDTO
             {
                 AlbumName = x.AlbumName,

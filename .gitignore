@@ -396,3 +396,10 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+.idea/
+
+# Local config overrides holding real secrets — never commit these.
+# Production secrets (AuthOptions:Key, DB password) must come from env vars / a secret store.
+appsettings.Local.json
+appsettings.*.Local.json
+.env

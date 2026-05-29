@@ -29,6 +29,7 @@ public class GetTrackByIdEndpoint(AppDbContext appDbContext) : EndpointWithoutRe
                 .SingleOrDefaultAsync(ct);
 
         var track = await _appDbContext.Songs
+            .Where(x => x.Id == id)
             .Select(x => new TrackDTO
             {
                 Id = x.Id,
@@ -53,7 +54,7 @@ public class GetTrackByIdEndpoint(AppDbContext appDbContext) : EndpointWithoutRe
                     ArtistName = a.ArtistName,
                     Id = a.Id
                 }).ToList()
-            }).SingleOrDefaultAsync(x => x.Id == id, ct);
+            }).SingleOrDefaultAsync(ct);
 
         if (track == null)
         {

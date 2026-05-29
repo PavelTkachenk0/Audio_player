@@ -58,8 +58,7 @@ public class GenerateQrCodeEndpoint(AppDbContext appDbContext) : EndpointWithout
 
         return new GenerateQrCodeResponse
         {
-            QrCodeImageBase64 = $"data:image/png;base64,{Convert.ToBase64String(qrCodeImage)}",
-            SecretKey = user.TwoFactorSecret
+            QrCodeImageBase64 = $"data:image/png;base64,{Convert.ToBase64String(qrCodeImage)}"
         };
     }
 }

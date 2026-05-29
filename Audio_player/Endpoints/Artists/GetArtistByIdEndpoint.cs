@@ -30,7 +30,7 @@ public class GetArtistByIdEndpoint(AppDbContext appDbContext) : EndpointWithoutR
                 .Select(x => x.UserProfile!.Id)
                 .SingleOrDefaultAsync(ct);
 
-        var artist = await _appDbContext.Artists.Select(x => new ArtistDTO
+        var artist = await _appDbContext.Artists.Where(x => x.Id == id).Select(x => new ArtistDTO
         {
             ArtistName = x.ArtistName,
             CoverPath = x.CoverPath,
@@ -42,7 +42,7 @@ public class GetArtistByIdEndpoint(AppDbContext appDbContext) : EndpointWithoutR
                 Id = x.Id,
                 Name = x.Name
             }).ToList()
-        }).SingleOrDefaultAsync(x => x.Id == id, ct);
+        }).SingleOrDefaultAsync(ct);
 
         if (artist == null)
         {

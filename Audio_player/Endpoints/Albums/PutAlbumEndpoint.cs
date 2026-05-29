@@ -73,7 +73,7 @@ public class PutAlbumEndpoint(AppDbContext appDbContext,
         var artistsInRequest = req.ArtistIds ?? [];
 
         var artistsToDelete = album.ArtistsAlbums
-            .Where(x => !artistsInRequest.Contains(x.ArtistId) && x.AlbumId != album.Id);
+            .Where(x => !artistsInRequest.Contains(x.ArtistId) && x.AlbumId == album.Id);
 
         var artistsToAdd = req.ArtistIds?
             .Where(id => !album.ArtistsAlbums.Any(x => x.ArtistId == id))

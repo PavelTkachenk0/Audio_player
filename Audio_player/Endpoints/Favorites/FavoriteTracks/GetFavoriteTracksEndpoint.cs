@@ -28,7 +28,7 @@ public class GetFavoriteTracksEndpoint(AppDbContext appDbContext) : EndpointWith
                 .SingleOrDefaultAsync(ct);
 
         var tracks = await _appDbContext.Songs
-            .Where(x => x.UserSongs.Select(us => us.SongId).Contains(x.Id))
+            .Where(x => x.UserSongs.Any(us => us.UserId == userId))
             .Select(x => new TrackDTO
             {
                 SongName = x.SongName,

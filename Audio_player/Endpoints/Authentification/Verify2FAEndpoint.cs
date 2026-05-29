@@ -23,7 +23,15 @@ public class Verify2FAEndpoint(AppDbContext appDbContext, GenerateTokenService t
 
     public override async Task<TokenResponse?> ExecuteAsync(Verify2FARequest req, CancellationToken ct)
     {
-        var user = await _appDbContext.AppUsers.Where(x => x.Email == req.Email)
+        var email = _tokenService.ValidateTwoFactorPendingToken(req.TwoFactorToken);
+
+        if (email == null)
+        {
+            await SendUnauthorizedAsync(ct);
+            return null;
+        }
+
+        var user = await _appDbContext.AppUsers.Where(x => x.Email == email)
                 .SingleOrDefaultAsync(ct);
 
         if (user == null || string.IsNullOrEmpty(user.TwoFactorSecret))
@@ -35,21 +43,19 @@ public class Verify2FAEndpoint(AppDbContext appDbContext, GenerateTokenService t
         var totp = new Totp(Base32Encoding.ToBytes(user.TwoFactorSecret));
         bool isValid = totp.VerifyTotp(req.Code, out long _);
 
-        if (isValid)
-        {
-            var accessToken = await _tokenService.GenerateAccessToken(user.Email, ct);
-
-            await _tokenService.SetRefreshTokenCookieAsync(HttpContext.Response, user.Email, ct);
-
-            return new TokenResponse
-            {
-                AccessToken = accessToken
-            };
-        }
-        else
+        if (!isValid)
         {
             await SendUnauthorizedAsync(ct);
             return null;
         }
+
+        var accessToken = await _tokenService.GenerateAccessToken(user.Email, ct);
+
+        await _tokenService.SetRefreshTokenCookieAsync(HttpContext.Response, user.Email, ct);
+
+        return new TokenResponse
+        {
+            AccessToken = accessToken
+        };
     }
 }

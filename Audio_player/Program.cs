@@ -4,7 +4,6 @@ using Audio_player.DAL;
 using Audio_player.Helpers;
 using Audio_player.Hubs;
 using Audio_player.Jobs;
-using Audio_player.Middlewares;
 using Audio_player.Services;
 using FastEndpoints;
 using FastEndpoints.Swagger;
@@ -13,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Quartz;
 using Serilog;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 Log.Logger = new LoggerConfiguration()
@@ -38,6 +38,12 @@ try
 
     var app = builder.Build();
 
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        dbContext.Database.Migrate();
+    }
+
     if (!app.Environment.IsDevelopment())
     {
         app.UseHttpsRedirection();
@@ -48,13 +54,11 @@ try
     app.UseFastEndpoints(config =>
     {
         config.Endpoints.RoutePrefix = "api";
-        config.Errors.StatusCode = 418;
+        config.Errors.StatusCode = 400;
     })
     .UseSwaggerGen();
 
     app.UseCors("CorsPolicy");
-
-    app.UseMiddleware<AccessTokenValidationMiddleware>();
 
     app.UseRouting();
 
@@ -62,7 +66,7 @@ try
 
     app.UseAuthorization();
 
-    app.MapHub<AudioHub>("/audioHub").AllowAnonymous();
+    app.MapHub<AudioHub>("/audioHub").RequireAuthorization();
 
     app.MapDefaultControllerRoute();
 
@@ -91,11 +95,14 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
 
     services.AddCors(options =>
     {
+        var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+            ?? Array.Empty<string>();
+
         options.AddPolicy("CorsPolicy", builder => builder
             .AllowAnyMethod()
             .AllowAnyHeader()
             .AllowCredentials()
-            .SetIsOriginAllowed((host) => true));
+            .WithOrigins(allowedOrigins));
     });
 
     services.AddFastEndpoints(o =>
@@ -114,6 +121,8 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
     services.AddScoped<GenerateTokenService>();
 
     services.AddScoped<FileService>();
+
+    services.AddSingleton<IPasswordHasher, BcryptPasswordHasher>();
 
     ConfigureAppSettings(services, configuration);
 }
@@ -139,6 +148,48 @@ static void ConfigureAuth(IServiceCollection services, IConfiguration configurat
                 IssuerSigningKey = authOptions.GetSymmetricSecurityKey(),
                 ValidateIssuerSigningKey = true,
                 RoleClaimType = ClaimTypes.Role
+            };
+
+            options.Events = new JwtBearerEvents
+            {
+                // Let SignalR clients pass the JWT via the access_token query string.
+                OnMessageReceived = context =>
+                {
+                    var accessToken = context.Request.Query["access_token"];
+
+                    if (!string.IsNullOrEmpty(accessToken)
+                        && context.HttpContext.Request.Path.StartsWithSegments("/audioHub"))
+                    {
+                        context.Token = accessToken;
+                    }
+
+                    return Task.CompletedTask;
+                },
+                // Reject access tokens that were revoked at logout. Runs AFTER signature
+                // validation, replacing the old pre-routing middleware that trusted unsigned tokens.
+                OnTokenValidated = async context =>
+                {
+                    var jti = context.Principal?.FindFirst(JwtRegisteredClaimNames.Jti)?.Value;
+
+                    if (jti == null)
+                    {
+                        context.Fail("invalid_token");
+                        return;
+                    }
+
+                    var dbContext = context.HttpContext.RequestServices.GetRequiredService<AppDbContext>();
+
+                    var isRevoked = await dbContext.AccessTokens
+                        .Where(x => x.Jti == jti)
+                        .Select(x => (bool?)x.IsRevoked)
+                        .FirstOrDefaultAsync(context.HttpContext.RequestAborted);
+
+                    // Unknown jti (cleaned up) or explicitly revoked → reject.
+                    if (isRevoked != false)
+                    {
+                        context.Fail("token_revoked");
+                    }
+                }
             };
         });
 

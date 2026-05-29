@@ -21,14 +21,14 @@ public class GetUserByIdEndpoint(AppDbContext appDbContext) : EndpointWithoutReq
     {
         var id = Route<long>("id");
 
-        var user = await _appDbContext.AppUsers.Select(x => new UserDTO
+        var user = await _appDbContext.AppUsers.Where(x => x.Id == id).Select(x => new UserDTO
         {
             Id = x.Id,
             Email = x.Email,
             Birthday = x.UserProfile!.Birthdate,
             Surname = x.UserProfile!.Surname,
             Name = x.UserProfile!.Name,
-        }).SingleOrDefaultAsync(x => x.Id == id, ct);
+        }).SingleOrDefaultAsync(ct);
 
         if (user == null)
         {

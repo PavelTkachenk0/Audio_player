@@ -28,7 +28,7 @@ public class GetGenrePlaylistsByIdEndpoint(AppDbContext appDbContext) : Endpoint
                 .Select(x => x.UserProfile!.Id)
                 .SingleOrDefaultAsync(ct);
 
-        var playlist = await _appDbContext.Playlists.Select(x => new GenrePlaylistDTO
+        var playlist = await _appDbContext.Playlists.Where(x => x.Id == id).Select(x => new GenrePlaylistDTO
         {
             Id = x.Id,
             CoverPath = x.CoverPath,
@@ -48,7 +48,7 @@ public class GetGenrePlaylistsByIdEndpoint(AppDbContext appDbContext) : Endpoint
                     Id = x.Id,
                 }).ToList(),
             }).ToList()
-        }).SingleOrDefaultAsync(x => x.Id == id, ct);
+        }).SingleOrDefaultAsync(ct);
 
         if (playlist == null)
         {

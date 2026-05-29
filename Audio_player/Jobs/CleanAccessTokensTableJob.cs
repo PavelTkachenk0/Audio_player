@@ -12,7 +12,7 @@ public class CleanAccessTokensTableJob(AppDbContext appDbContext) : IJob
     {
         await JobSynchronizationHelper.RunAccessTokensTableJobsWithLock(async () =>
         {
-            var tokens = _appDbContext.AccessTokens.Where(x => (DateTime.UtcNow - x.ExpiryDate).Days > 7);
+            var tokens = _appDbContext.AccessTokens.Where(x => x.ExpiryDate < DateTime.UtcNow.AddDays(-7));
 
             _appDbContext.AccessTokens.RemoveRange(tokens);
 

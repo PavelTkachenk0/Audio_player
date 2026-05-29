@@ -28,10 +28,15 @@ public class GetRecommendationPlaylistsEndpoint(AppDbContext appDbContext) : End
         .Select(x => x.UserProfile!.Id)
                 .SingleOrDefaultAsync(ct);
 
-        var playlists = await _appDbContext.Playlists
-            .Where(x => x.IsAdmin)
+        var query = _appDbContext.Playlists
+            .Where(x => x.IsAdmin);
+
+        var totalCount = await query.CountAsync(ct);
+
+        var playlists = await query
+            .OrderBy(x => x.Id)
             .Skip((int)(req.Skip == null ? 0 : req.Skip!))
-            .Take((int)(req.Take == null ? 0 : req.Take!))
+            .Take((int)(req.Take == null ? 10 : req.Take!))
             .Select(x => new ShortGenrePlaylistDTO
             {
                 Id = x.Id,
@@ -42,7 +47,7 @@ public class GetRecommendationPlaylistsEndpoint(AppDbContext appDbContext) : End
         return new GetRecommendationPlaylistsResposne
         {
             Result = playlists,
-            TotalCount = playlists.Count
+            TotalCount = totalCount
         };
     }
 }

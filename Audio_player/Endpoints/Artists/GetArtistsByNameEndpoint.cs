@@ -3,7 +3,6 @@ using Audio_player.DAL;
 using Audio_player.Models.DTOs;
 using Audio_player.Models.Requests;
 using Audio_player.Models.Responses;
-using AutoMapper;
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;

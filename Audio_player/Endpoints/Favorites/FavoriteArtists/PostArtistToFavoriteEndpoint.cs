@@ -21,7 +21,7 @@ public class PostArtistToFavoriteEndpoint(AppDbContext appDbContext) : EndpointW
     {
         var artistId = Route<long>("id");
 
-        if (!_appDbContext.Artists.Any(x => x.Id == artistId))
+        if (!await _appDbContext.Artists.AnyAsync(x => x.Id == artistId, ct))
         {
             await SendNotFoundAsync(ct);
             return new FavoriteResponse

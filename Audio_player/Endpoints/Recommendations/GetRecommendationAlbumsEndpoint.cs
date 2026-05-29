@@ -28,7 +28,12 @@ public class GetRecommendationAlbumsEndpointI(AppDbContext appDbContext) : Endpo
                 .Select(x => x.UserProfile!.Id)
                 .SingleOrDefaultAsync(ct);
         
-        var result = await _appDbContext.Albums
+        var query = _appDbContext.Albums;
+
+        var totalCount = await query.CountAsync(ct);
+
+        var result = await query
+            .OrderBy(x => x.Id)
             .Skip((int)(req.Skip == null ? 0 : req.Skip!))
             .Take((int)(req.Take == null ? 10 : req.Take!))
             .Select(x => new AlbumDTO
@@ -52,7 +57,7 @@ public class GetRecommendationAlbumsEndpointI(AppDbContext appDbContext) : Endpo
         return new RecommendationAlbumsResponse
         {
             Result = result,
-            TotalCount = result.Count()
+            TotalCount = totalCount
         };
     }
 }

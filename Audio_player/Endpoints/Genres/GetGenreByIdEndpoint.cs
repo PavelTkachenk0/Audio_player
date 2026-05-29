@@ -2,7 +2,6 @@
 using Audio_player.DAL;
 using Audio_player.Models.DTOs;
 using Audio_player.Models.Responses;
-using AutoMapper;
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,12 +22,12 @@ public class GetGenreByIdEndpoint(AppDbContext appDbContext) : EndpointWithoutRe
     {
         var genreId = Route<short>("id");
 
-        var genre = await _appDbContext.Genres.Select(x => new GenreDTO
+        var genre = await _appDbContext.Genres.Where(x => x.Id == genreId).Select(x => new GenreDTO
         {
             CoverPath = x.CoverPath,
             Id = x.Id,
             Name = x.Name,
-        }).SingleOrDefaultAsync(x => x.Id == genreId, ct);
+        }).SingleOrDefaultAsync(ct);
 
         if (genre == null)
         {

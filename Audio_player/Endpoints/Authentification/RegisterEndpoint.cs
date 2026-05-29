@@ -3,14 +3,16 @@ using Audio_player.DAL.Models;
 using Audio_player.Helpers;
 using Audio_player.Models.Requests;
 using Audio_player.Models.Responses;
+using Audio_player.Services;
 using FastEndpoints;
 
 namespace Audio_player.Endpoints.Authentification;
 
-public class RegisterEndpoint(AppDbContext appDbContext, GenerateTokenService tokenService) : Endpoint<RegisterRequest, TokenResponse>
+public class RegisterEndpoint(AppDbContext appDbContext, GenerateTokenService tokenService, IPasswordHasher passwordHasher) : Endpoint<RegisterRequest, TokenResponse>
 {
     private readonly GenerateTokenService _tokenService = tokenService;
     private readonly AppDbContext _appDbContext = appDbContext;
+    private readonly IPasswordHasher _passwordHasher = passwordHasher;
 
     public override void Configure()
     {
@@ -24,7 +26,7 @@ public class RegisterEndpoint(AppDbContext appDbContext, GenerateTokenService to
         var user = _appDbContext.AppUsers.Add(new DAL.Models.AppUser
         {
             Email = req.Email,
-            Password = req.Password,
+            Password = _passwordHasher.Hash(req.Password),
             UserProfile = new DAL.Models.UserProfile
             {
                 Birthdate = req.Birthday,

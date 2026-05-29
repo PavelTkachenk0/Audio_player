@@ -28,9 +28,14 @@ public class GetRecommendationArtistsEndpoint(AppDbContext appDbContext) : Endpo
                 .Select(x => x.UserProfile!.Id)
                 .SingleOrDefaultAsync(ct);
 
-        var artists = await _appDbContext.Artists
+        var query = _appDbContext.Artists;
+
+        var totalCount = await query.CountAsync(ct);
+
+        var artists = await query
+            .OrderBy(x => x.Id)
             .Skip((int)(req.Skip == null ? 0 : req.Skip!))
-            .Take((int)(req.Take == null ? 0 : req.Take!))
+            .Take((int)(req.Take == null ? 10 : req.Take!))
             .Select(x => new ArtistDTO
             {
                 ArtistName = x.ArtistName,
@@ -49,7 +54,7 @@ public class GetRecommendationArtistsEndpoint(AppDbContext appDbContext) : Endpo
         return new GetRecommendationArtistsResponse
         {
             Result = artists,
-            TotalCount = artists.Count
+            TotalCount = totalCount
         };
     }
 }

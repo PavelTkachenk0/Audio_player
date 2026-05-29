@@ -1,10 +1,10 @@
-﻿using Audio_player.AppSettingsOptions;
+using Audio_player.AppSettingsOptions;
 using Audio_player.DAL;
 using Microsoft.Extensions.Options;
 
 namespace Audio_player.Services;
 
-public class FileService(AppDbContext appDbContext, IOptionsSnapshot<ImageStoreOptions> imageOptionsSnapshot, 
+public class FileService(AppDbContext appDbContext, IOptionsSnapshot<ImageStoreOptions> imageOptionsSnapshot,
     IOptionsSnapshot<AudioStoreOptions> audioOptionsSnapshot)
 {
     private readonly AppDbContext _appDbContext = appDbContext;
@@ -13,10 +13,12 @@ public class FileService(AppDbContext appDbContext, IOptionsSnapshot<ImageStoreO
 
     public async Task<string> CreateFile(IFormFile file, bool isImage, CancellationToken ct)
     {
+        var directory = isImage ? _imageOptions.FilesPath : _audioOptions.FilesPath;
+
+        Directory.CreateDirectory(directory);
+
         var newFileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName).ToLower();
-        var filePath = isImage 
-            ? Path.Combine(_imageOptions.FilesPath, newFileName) 
-            : Path.Combine(_audioOptions.FilesPath, newFileName);
+        var filePath = Path.Combine(directory, newFileName);
 
         using var fileStream = File.Create(filePath);
 

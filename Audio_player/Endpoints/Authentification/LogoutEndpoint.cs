@@ -24,12 +24,13 @@ public class LogoutEndpoint(AppDbContext appDbContext, GenerateTokenService toke
 
         if (!string.IsNullOrEmpty(refreshToken))
         {
-            var tokenData = await _appDbContext.RefreshTokens.SingleAsync(x => x.Token == refreshToken, ct);
+            var tokenData = await _appDbContext.RefreshTokens.SingleOrDefaultAsync(x => x.Token == refreshToken, ct);
 
-            tokenData.IsRevoked = true;
-
-            _appDbContext.RefreshTokens.Update(tokenData);
-            await _appDbContext.SaveChangesAsync(ct);
+            if (tokenData != null)
+            {
+                tokenData.IsRevoked = true;
+                await _appDbContext.SaveChangesAsync(ct);
+            }
         }
 
         if (!string.IsNullOrEmpty(accessToken))

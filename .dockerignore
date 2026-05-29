@@ -1,0 +1,18 @@
+# Build artifacts
+**/bin
+**/obj
+
+# Version control
+.git
+.gitignore
+
+# IDE / editor metadata
+.idea
+.vs
+
+# Logs and local user files
+**/logs
+*.user
+
+# Docs
+docs

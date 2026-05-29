@@ -29,7 +29,7 @@ public class GetAlbumByIdEndpoint(AppDbContext appDbContext) : EndpointWithoutRe
                 .Select(x => x.UserProfile!.Id)
                 .SingleOrDefaultAsync(ct);
 
-        var album = await _appDbContext.Albums.Select(x => new AlbumDTO
+        var album = await _appDbContext.Albums.Where(x => x.Id == id).Select(x => new AlbumDTO
         {
             AlbumName = x.AlbumName,
             CoverPath = x.CoverPath,
@@ -45,7 +45,7 @@ public class GetAlbumByIdEndpoint(AppDbContext appDbContext) : EndpointWithoutRe
             }).ToList(),
             Id = x.Id,
             IsFavorite = x.UserAlbums.Any(x => x.UserId == userId),
-        }).SingleOrDefaultAsync(x => x.Id == id, ct);
+        }).SingleOrDefaultAsync(ct);
 
         if (album == null)
         {

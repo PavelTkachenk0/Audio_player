@@ -22,7 +22,7 @@ public class PostTrackToFavoriteEndpoint(AppDbContext appDbContext) : EndpointWi
     {
         var trackId = Route<long>("id");
 
-        if (!_appDbContext.Songs.Any(x => x.Id == trackId))
+        if (!await _appDbContext.Songs.AnyAsync(x => x.Id == trackId, ct))
         {
             await SendNotFoundAsync(ct);
             return new FavoriteResponse

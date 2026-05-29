@@ -28,9 +28,14 @@ public class GetRecommendationTracksEndpoint(AppDbContext appDbContext) : Endpoi
                 .Select(x => x.UserProfile!.Id)
                 .SingleOrDefaultAsync(ct);
 
-        var tracks = await _appDbContext.Songs
+        var query = _appDbContext.Songs;
+
+        var totalCount = await query.CountAsync(ct);
+
+        var tracks = await query
+            .OrderByDescending(x => x.ListeningCount)
             .Skip((int)(req.Skip == null ? 0 : req.Skip!))
-            .Take((int)(req.Take == null ? 0 : req.Take!))
+            .Take((int)(req.Take == null ? 10 : req.Take!))
             .Select(x => new TrackDTO
             {
                 SongName = x.SongName,
@@ -52,7 +57,7 @@ public class GetRecommendationTracksEndpoint(AppDbContext appDbContext) : Endpoi
                 {
                     AlbumName = x.Album!.AlbumName,
                     CoverPath = x.Album!.CoverPath,
-                    Id = x.Id
+                    Id = x.Album!.Id
                 },
                 IsFavorite = x.UserSongs.Any(x => x.UserId == userId),
             }).ToListAsync(ct);
@@ -60,7 +65,7 @@ public class GetRecommendationTracksEndpoint(AppDbContext appDbContext) : Endpoi
         return new GetRecommendationTracksResponse
         {
             Result = tracks,
-            TotalCount = tracks.Count
+            TotalCount = totalCount
         };
     }
 }

@@ -1,4 +1,4 @@
-﻿using Audio_player.DAL;
+using Audio_player.DAL;
 using Audio_player.Helpers;
 using Audio_player.Models.Responses;
 using FastEndpoints;
@@ -27,25 +27,24 @@ public class RefreshTokenEndpoint(AppDbContext appDbContext, GenerateTokenServic
             ThrowError("Refresh token is missing");
         }
 
-        var tokenData = await _appDbContext.RefreshTokens.SingleOrDefaultAsync(x => x.Token == refreshToken, ct);
+        var tokenData = await _appDbContext.RefreshTokens
+            .Include(x => x.User)
+            .SingleOrDefaultAsync(x => x.Token == refreshToken, ct);
 
-        if (tokenData == null || tokenData.IsRevoked == true || tokenData.ExpiryDate <= DateTime.UtcNow)
+        if (tokenData == null || tokenData.IsRevoked || tokenData.ExpiryDate <= DateTime.UtcNow)
         {
             ThrowError("Invalid or expired refresh token");
         }
 
-        var user = await _appDbContext.RefreshTokens
-            .Where(x => x.Token == refreshToken)
-            .Select(x => x.User)
-            .SingleOrDefaultAsync(ct);
+        var email = tokenData.User.Email;
 
-        if (user!.Email == null)
-        {
-            ThrowError("Invalid refresh token");
-        }
+        // Rotate the refresh token: revoke the one just used and issue a fresh one.
+        tokenData.IsRevoked = true;
+        await _appDbContext.SaveChangesAsync(ct);
 
-        var accessToken = await _tokenService.GenerateAccessToken(user.Email, ct);
-       
+        var accessToken = await _tokenService.GenerateAccessToken(email, ct);
+        await _tokenService.SetRefreshTokenCookieAsync(HttpContext.Response, email, ct);
+
         return new TokenResponse
         {
             AccessToken = accessToken

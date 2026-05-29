@@ -26,7 +26,7 @@ public class GetFavoriteArtistsEndpoint(AppDbContext appDbContext) : EndpointWit
                 .SingleOrDefaultAsync(ct);
 
         var artists = await _appDbContext.Artists
-            .Where(x => x.UserArtists.Select(us => us.ArtistId).Contains(x.Id))
+            .Where(x => x.UserArtists.Any(us => us.UserId == userId))
             .Select(x => new ArtistDTO
             {
                 ArtistName = x.ArtistName,

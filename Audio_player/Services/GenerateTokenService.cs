@@ -1,4 +1,4 @@
-﻿using Audio_player.AppSettingsOptions;
+using Audio_player.AppSettingsOptions;
 using Audio_player.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -13,38 +13,42 @@ public class GenerateTokenService(IOptionsSnapshot<AuthOptions> optionsSnapshot,
     private readonly AuthOptions _authOptions = optionsSnapshot.Value;
     private readonly AppDbContext _appDbContext = appDbContext;
 
+    private const int AccessTokenMinutes = 15;
+    private const int RefreshTokenDays = 7;
+    private const int TwoFactorPendingMinutes = 5;
+    private const string TokenUseClaim = "token_use";
+    private const string TwoFactorPendingTokenUse = "2fa_pending";
+
     public async Task<string> GenerateAccessToken(string email, CancellationToken ct)
     {
         var jti = Guid.NewGuid().ToString();
+
+        var user = await _appDbContext.AppUsers
+            .Where(x => x.Email == email)
+            .Select(x => new { x.Id, Roles = x.Roles.Select(r => r.Name).ToList() })
+            .SingleAsync(ct);
+
         var claims = new List<Claim>
         {
             new(JwtRegisteredClaimNames.Sub, email),
             new(JwtRegisteredClaimNames.Jti, jti)
         };
 
-        var roles = _appDbContext.AppUsers
-            .Where(x => x.Email == email)
-            .SelectMany(x => x.Roles.Select(x => x.Name))
-            .ToList();
-
-        foreach (var role in roles)
-        {
-            claims.Add(new Claim(ClaimTypes.Role, role));
-        }
+        claims.AddRange(user.Roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
         var token = new JwtSecurityToken(
-        issuer: _authOptions.Issuer,
-        audience: _authOptions.Audience,
+            issuer: _authOptions.Issuer,
+            audience: _authOptions.Audience,
             claims: claims,
-            expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(15)),
+            expires: DateTime.UtcNow.AddMinutes(AccessTokenMinutes),
             signingCredentials: new SigningCredentials(_authOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256)
         );
 
         _appDbContext.AccessTokens.Add(new DAL.Models.AccessToken
         {
-            ExpiryDate = DateTime.UtcNow.AddMinutes(15),
+            ExpiryDate = DateTime.UtcNow.AddMinutes(AccessTokenMinutes),
             Jti = jti,
-            User = await _appDbContext.AppUsers.SingleAsync(x => x.Email == email, ct),
+            UserId = user.Id
         });
 
         await _appDbContext.SaveChangesAsync(ct);
@@ -52,15 +56,73 @@ public class GenerateTokenService(IOptionsSnapshot<AuthOptions> optionsSnapshot,
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
+    /// <summary>
+    /// Short-lived token issued after a correct password when 2FA is enabled.
+    /// It only proves "password step passed"; it carries no roles, so it cannot
+    /// access protected endpoints — it is exchanged at /verify-2fa for a real token.
+    /// </summary>
+    public string GenerateTwoFactorPendingToken(string email)
+    {
+        var token = new JwtSecurityToken(
+            issuer: _authOptions.Issuer,
+            audience: _authOptions.Audience,
+            claims: new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, email),
+                new Claim(TokenUseClaim, TwoFactorPendingTokenUse)
+            },
+            expires: DateTime.UtcNow.AddMinutes(TwoFactorPendingMinutes),
+            signingCredentials: new SigningCredentials(_authOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256)
+        );
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    /// <summary>Returns the email if the pending 2FA token is valid, otherwise null.</summary>
+    public string? ValidateTwoFactorPendingToken(string token)
+    {
+        try
+        {
+            var principal = new JwtSecurityTokenHandler().ValidateToken(token, new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidIssuer = _authOptions.Issuer,
+                ValidateAudience = true,
+                ValidAudience = _authOptions.Audience,
+                ValidateLifetime = true,
+                IssuerSigningKey = _authOptions.GetSymmetricSecurityKey(),
+                ValidateIssuerSigningKey = true,
+                ClockSkew = TimeSpan.FromSeconds(30)
+            }, out _);
+
+            if (principal.FindFirst(TokenUseClaim)?.Value != TwoFactorPendingTokenUse)
+            {
+                return null;
+            }
+
+            return principal.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
+                ?? principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
     public async Task<string> GenerateRefreshTokenAsync(string email, CancellationToken ct)
     {
         var refreshToken = Guid.NewGuid().ToString();
 
+        var userId = await _appDbContext.AppUsers
+            .Where(x => x.Email == email)
+            .Select(x => x.Id)
+            .SingleAsync(ct);
+
         _appDbContext.RefreshTokens.Add(new DAL.Models.RefreshToken
         {
-            ExpiryDate = DateTime.UtcNow.AddDays(7),
+            ExpiryDate = DateTime.UtcNow.AddDays(RefreshTokenDays),
             Token = refreshToken,
-            User = await _appDbContext.AppUsers.SingleAsync(x => x.Email == email, ct)
+            UserId = userId
         });
 
         await _appDbContext.SaveChangesAsync(ct);
@@ -77,7 +139,7 @@ public class GenerateTokenService(IOptionsSnapshot<AuthOptions> optionsSnapshot,
             HttpOnly = true,
             Secure = true,
             SameSite = SameSiteMode.Strict,
-            Expires = DateTime.UtcNow.AddDays(7)
+            Expires = DateTime.UtcNow.AddDays(RefreshTokenDays)
         });
 
         return refreshToken;
@@ -85,12 +147,14 @@ public class GenerateTokenService(IOptionsSnapshot<AuthOptions> optionsSnapshot,
 
     public async Task RevokeAccessTokenAsync(string jti, CancellationToken ct)
     {
-        var token = await _appDbContext.AccessTokens.SingleOrDefaultAsync(x => x.Jti == jti, ct) 
-            ?? throw new Exception("Access token not found");
+        var token = await _appDbContext.AccessTokens.SingleOrDefaultAsync(x => x.Jti == jti, ct);
+
+        if (token == null)
+        {
+            return;
+        }
 
         token.IsRevoked = true;
-
-        _appDbContext.AccessTokens.Update(token);
 
         await _appDbContext.SaveChangesAsync(ct);
     }
