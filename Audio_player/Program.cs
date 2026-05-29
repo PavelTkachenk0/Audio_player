@@ -128,6 +128,9 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
     services.AddScoped<GenreService>();
     services.AddScoped<GenrePlaylistService>();
     services.AddScoped<UserService>();
+    services.AddScoped<RecommendationService>();
+    services.AddScoped<FavoriteService>();
+    services.AddScoped<SearchService>();
 
     services.AddSingleton<IPasswordHasher, BcryptPasswordHasher>();
 

@@ -1,15 +1,12 @@
-﻿using Audio_player.Constants;
-using Audio_player.DAL;
 using Audio_player.Models.Responses;
+using Audio_player.Services;
 using FastEndpoints;
-using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 
 namespace Audio_player.Endpoints.Favorites.FavoriteAlbums;
 
-public class PostAlbumToFavoriteEndpoint(AppDbContext appDbContext) : EndpointWithoutRequest<FavoriteResponse>
+public class PostAlbumToFavoriteEndpoint(FavoriteService favoriteService) : EndpointWithoutRequest<FavoriteResponse>
 {
-    private readonly AppDbContext _appDbContext = appDbContext;
+    private readonly FavoriteService _favoriteService = favoriteService;
 
     public override void Configure()
     {
@@ -21,7 +18,7 @@ public class PostAlbumToFavoriteEndpoint(AppDbContext appDbContext) : EndpointWi
     {
         var albumId = Route<long>("id");
 
-        if (!await _appDbContext.Albums.AnyAsync(x => x.Id == albumId, ct))
+        if (!await _favoriteService.AddAlbumAsync(albumId, HttpContext.User, ct))
         {
             await SendNotFoundAsync(ct);
             return new FavoriteResponse
@@ -29,20 +26,6 @@ public class PostAlbumToFavoriteEndpoint(AppDbContext appDbContext) : EndpointWi
                 Added = false
             };
         }
-
-        var email = HttpContext.User.Claims.
-          FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value!;
-        var userId = await _appDbContext.AppUsers.Where(x => x.Email == email)
-                .Select(x => x.UserProfile!.Id)
-        .SingleOrDefaultAsync(ct);
-
-        _appDbContext.UserAlbums.Add(new DAL.Models.UserAlbum
-        {
-            AlbumId = albumId,
-            UserId = userId
-        });
-
-        await _appDbContext.SaveChangesAsync(ct);
 
         return new FavoriteResponse
         {
