@@ -3,7 +3,7 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
-namespace Audio_player.Validators.Authentification;
+namespace Audio_player.Validators.Authentication;
 
 public class LoginValidator : BaseValidator<LoginRequest>
 {

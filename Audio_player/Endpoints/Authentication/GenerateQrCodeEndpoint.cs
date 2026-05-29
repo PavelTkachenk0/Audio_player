@@ -7,7 +7,7 @@ using OtpNet;
 using QRCoder;
 using System.Security.Claims;
 
-namespace Audio_player.Endpoints.Authentification;
+namespace Audio_player.Endpoints.Authentication;
 
 public class GenerateQrCodeEndpoint(AppDbContext appDbContext) : EndpointWithoutRequest<GenerateQrCodeResponse>
 {
@@ -16,7 +16,7 @@ public class GenerateQrCodeEndpoint(AppDbContext appDbContext) : EndpointWithout
     public override void Configure()
     {
         Post("generate-qr-code");
-        Group<AuthentificationGroup>();
+        Group<AuthenticationGroup>();
         Policies(PolicyNames.HasAdminOrUserRole);
     }
 

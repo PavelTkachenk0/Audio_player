@@ -4,7 +4,7 @@ using Audio_player.Models.Responses;
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 
-namespace Audio_player.Endpoints.Authentification;
+namespace Audio_player.Endpoints.Authentication;
 
 public class RefreshTokenEndpoint(AppDbContext appDbContext, GenerateTokenService tokenService) : EndpointWithoutRequest<TokenResponse>
 {
@@ -14,7 +14,7 @@ public class RefreshTokenEndpoint(AppDbContext appDbContext, GenerateTokenServic
     public override void Configure()
     {
         Post("refresh");
-        Group<AuthentificationGroup>();
+        Group<AuthenticationGroup>();
         AllowAnonymous();
     }
 

@@ -7,7 +7,7 @@ using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
-namespace Audio_player.Endpoints.Authentification;
+namespace Audio_player.Endpoints.Authentication;
 
 public class ConfirmPasswordEndpoint(AppDbContext appDbContext, IPasswordHasher passwordHasher) : Endpoint<ConfirmPasswordRequest, ConfirmResponse>
 {
@@ -17,7 +17,7 @@ public class ConfirmPasswordEndpoint(AppDbContext appDbContext, IPasswordHasher 
     public override void Configure()
     {
         Post("confirm-password");
-        Group<AuthentificationGroup>();
+        Group<AuthenticationGroup>();
         Policies(PolicyNames.HasAdminOrUserRole);
     }
 

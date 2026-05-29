@@ -4,7 +4,7 @@ using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using System.IdentityModel.Tokens.Jwt;
 
-namespace Audio_player.Endpoints.Authentification;
+namespace Audio_player.Endpoints.Authentication;
 
 public class LogoutEndpoint(AppDbContext appDbContext, GenerateTokenService tokenService) : EndpointWithoutRequest
 {
@@ -14,7 +14,7 @@ public class LogoutEndpoint(AppDbContext appDbContext, GenerateTokenService toke
     public override void Configure()
     {
         Post("logout");
-        Group<AuthentificationGroup>();
+        Group<AuthenticationGroup>();
     }
 
     public override async Task HandleAsync(CancellationToken ct)

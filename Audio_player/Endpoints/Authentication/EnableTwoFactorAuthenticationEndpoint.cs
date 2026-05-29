@@ -6,20 +6,20 @@ using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
-namespace Audio_player.Endpoints.Authentification;
+namespace Audio_player.Endpoints.Authentication;
 
-public class EnableTwoFactorAthentificationEndpoint(AppDbContext appDbContext) : Endpoint<EnableTwoFactorAthentificationRequest, ConfirmResponse>
+public class EnableTwoFactorAuthenticationEndpoint(AppDbContext appDbContext) : Endpoint<EnableTwoFactorAuthenticationRequest, ConfirmResponse>
 {
     private readonly AppDbContext _appDbContext = appDbContext;
 
     public override void Configure()
     {
         Put("/enable-2fa");
-        Group<AuthentificationGroup>();
+        Group<AuthenticationGroup>();
         Policies(PolicyNames.HasAdminOrUserRole);
     }
 
-    public override async Task<ConfirmResponse> ExecuteAsync(EnableTwoFactorAthentificationRequest req, CancellationToken ct)
+    public override async Task<ConfirmResponse> ExecuteAsync(EnableTwoFactorAuthenticationRequest req, CancellationToken ct)
     {
         var email = HttpContext.User.Claims.
           FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value!;

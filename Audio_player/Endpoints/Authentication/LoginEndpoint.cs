@@ -6,7 +6,7 @@ using Audio_player.Services;
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 
-namespace Audio_player.Endpoints.Authentification;
+namespace Audio_player.Endpoints.Authentication;
 
 public class LoginEndpoint(AppDbContext appDbContext, GenerateTokenService tokenService, IPasswordHasher passwordHasher) : Endpoint<LoginRequest, TokenResponse>
 {
@@ -17,7 +17,7 @@ public class LoginEndpoint(AppDbContext appDbContext, GenerateTokenService token
     public override void Configure()
     {
         Post("login");
-        Group<AuthentificationGroup>();
+        Group<AuthenticationGroup>();
         AllowAnonymous();
     }
 

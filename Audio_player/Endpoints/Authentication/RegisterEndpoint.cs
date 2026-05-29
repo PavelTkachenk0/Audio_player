@@ -6,7 +6,7 @@ using Audio_player.Models.Responses;
 using Audio_player.Services;
 using FastEndpoints;
 
-namespace Audio_player.Endpoints.Authentification;
+namespace Audio_player.Endpoints.Authentication;
 
 public class RegisterEndpoint(AppDbContext appDbContext, GenerateTokenService tokenService, IPasswordHasher passwordHasher) : Endpoint<RegisterRequest, TokenResponse>
 {
@@ -17,7 +17,7 @@ public class RegisterEndpoint(AppDbContext appDbContext, GenerateTokenService to
     public override void Configure()
     {
         Post("register");
-        Group<AuthentificationGroup>();
+        Group<AuthenticationGroup>();
         AllowAnonymous();
     }
 

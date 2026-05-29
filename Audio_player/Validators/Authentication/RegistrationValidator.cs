@@ -2,7 +2,7 @@
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
-namespace Audio_player.Validators.Authentification;
+namespace Audio_player.Validators.Authentication;
 
 public class RegistrationValidator : BaseValidator<RegisterRequest>
 {

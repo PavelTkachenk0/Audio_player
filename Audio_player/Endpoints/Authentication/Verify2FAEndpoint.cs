@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using OtpNet;
 using System.Security.Claims;
 
-namespace Audio_player.Endpoints.Authentification;
+namespace Audio_player.Endpoints.Authentication;
 
 public class Verify2FAEndpoint(AppDbContext appDbContext, GenerateTokenService tokenService) : Endpoint<Verify2FARequest, TokenResponse?>
 {
@@ -17,7 +17,7 @@ public class Verify2FAEndpoint(AppDbContext appDbContext, GenerateTokenService t
     public override void Configure()
     {
         Post("verify-2fa");
-        Group<AuthentificationGroup>();
+        Group<AuthenticationGroup>();
         AllowAnonymous();
     }
 
