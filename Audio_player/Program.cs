@@ -122,6 +122,13 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
 
     services.AddScoped<FileService>();
 
+    services.AddScoped<AlbumService>();
+    services.AddScoped<TrackService>();
+    services.AddScoped<ArtistService>();
+    services.AddScoped<GenreService>();
+    services.AddScoped<GenrePlaylistService>();
+    services.AddScoped<UserService>();
+
     services.AddSingleton<IPasswordHasher, BcryptPasswordHasher>();
 
     ConfigureAppSettings(services, configuration);

@@ -1,15 +1,13 @@
-﻿using Audio_player.Constants;
-using Audio_player.DAL;
+using Audio_player.Constants;
 using Audio_player.Models.DTOs;
+using Audio_player.Services;
 using FastEndpoints;
-using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 
 namespace Audio_player.Endpoints.Tracks;
 
-public class GetTrackByIdEndpoint(AppDbContext appDbContext) : EndpointWithoutRequest<TrackDTO?>
+public class GetTrackByIdEndpoint(TrackService trackService) : EndpointWithoutRequest<TrackDTO?>
 {
-    private readonly AppDbContext _appDbContext = appDbContext;
+    private readonly TrackService _trackService = trackService;
 
     public override void Configure()
     {
@@ -22,39 +20,7 @@ public class GetTrackByIdEndpoint(AppDbContext appDbContext) : EndpointWithoutRe
     {
         var id = Route<long>("id");
 
-        var email = HttpContext.User.Claims.
-          FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value!;
-        var userId = await _appDbContext.AppUsers.Where(x => x.Email == email)
-                .Select(x => x.UserProfile!.Id)
-                .SingleOrDefaultAsync(ct);
-
-        var track = await _appDbContext.Songs
-            .Where(x => x.Id == id)
-            .Select(x => new TrackDTO
-            {
-                Id = x.Id,
-                Duration = x.Duration,
-                ListeningCount = x.ListeningCount,
-                SongName = x.SongName,
-                SongPath = x.SongPath,
-                IsFavorite = x.UserSongs.Any(x => x.UserId == userId),
-                Album = new ShortAlbumDTO
-                {
-                    AlbumName = x.Album!.AlbumName,
-                    CoverPath = x.Album!.CoverPath,
-                    Id = x.Album!.Id
-                },
-                Genres = x.Genres.Select(g => new ShortGenreDTO
-                {
-                    Id = g.Id,
-                    Name = g.Name
-                }).ToList(),
-                Artists = x.Artists.Select(a => new ShortArtistDTO
-                {
-                    ArtistName = a.ArtistName,
-                    Id = a.Id
-                }).ToList()
-            }).SingleOrDefaultAsync(ct);
+        var track = await _trackService.GetByIdAsync(id, HttpContext.User, ct);
 
         if (track == null)
         {

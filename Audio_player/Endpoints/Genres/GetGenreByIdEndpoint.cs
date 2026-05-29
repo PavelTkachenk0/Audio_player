@@ -1,15 +1,13 @@
-﻿using Audio_player.Constants;
-using Audio_player.DAL;
+using Audio_player.Constants;
 using Audio_player.Models.DTOs;
-using Audio_player.Models.Responses;
+using Audio_player.Services;
 using FastEndpoints;
-using Microsoft.EntityFrameworkCore;
 
 namespace Audio_player.Endpoints.Genres;
 
-public class GetGenreByIdEndpoint(AppDbContext appDbContext) : EndpointWithoutRequest<GenreDTO?>
+public class GetGenreByIdEndpoint(GenreService genreService) : EndpointWithoutRequest<GenreDTO?>
 {
-    private readonly AppDbContext _appDbContext = appDbContext;
+    private readonly GenreService _genreService = genreService;
 
     public override void Configure()
     {
@@ -22,12 +20,7 @@ public class GetGenreByIdEndpoint(AppDbContext appDbContext) : EndpointWithoutRe
     {
         var genreId = Route<short>("id");
 
-        var genre = await _appDbContext.Genres.Where(x => x.Id == genreId).Select(x => new GenreDTO
-        {
-            CoverPath = x.CoverPath,
-            Id = x.Id,
-            Name = x.Name,
-        }).SingleOrDefaultAsync(ct);
+        var genre = await _genreService.GetByIdAsync(genreId, ct);
 
         if (genre == null)
         {

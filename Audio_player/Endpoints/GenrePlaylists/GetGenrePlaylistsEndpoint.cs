@@ -1,15 +1,13 @@
-﻿using Audio_player.Constants;
-using Audio_player.DAL;
-using Audio_player.Models.DTOs;
+using Audio_player.Constants;
 using Audio_player.Models.Responses;
+using Audio_player.Services;
 using FastEndpoints;
-using Microsoft.EntityFrameworkCore;
 
 namespace Audio_player.Endpoints.GenrePlaylists;
 
-public class GetGenrePlaylistsEndpoint(AppDbContext appDbContext) : EndpointWithoutRequest<GetGenrePlaylistsResponse>
+public class GetGenrePlaylistsEndpoint(GenrePlaylistService genrePlaylistService) : EndpointWithoutRequest<GetGenrePlaylistsResponse>
 {
-    private readonly AppDbContext _appDbContext = appDbContext;
+    private readonly GenrePlaylistService _genrePlaylistService = genrePlaylistService;
 
     public override void Configure()
     {
@@ -20,12 +18,7 @@ public class GetGenrePlaylistsEndpoint(AppDbContext appDbContext) : EndpointWith
 
     public override async Task<GetGenrePlaylistsResponse> ExecuteAsync(CancellationToken ct)
     {
-        var playlists = await _appDbContext.Playlists.Where(x => x.IsAdmin).Select(x => new ShortGenrePlaylistDTO
-        {
-            CoverPath = x.CoverPath,
-            Id = x.Id,
-            Name = x.Name
-        }).ToListAsync(ct);
+        var playlists = await _genrePlaylistService.GetAllAsync(ct);
 
         return new GetGenrePlaylistsResponse
         {

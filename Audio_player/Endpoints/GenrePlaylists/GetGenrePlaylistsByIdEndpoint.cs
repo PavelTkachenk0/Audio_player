@@ -1,15 +1,13 @@
-﻿using Audio_player.Constants;
-using Audio_player.DAL;
+using Audio_player.Constants;
 using Audio_player.Models.DTOs;
+using Audio_player.Services;
 using FastEndpoints;
-using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 
 namespace Audio_player.Endpoints.GenrePlaylists;
 
-public class GetGenrePlaylistsByIdEndpoint(AppDbContext appDbContext) : EndpointWithoutRequest<GenrePlaylistDTO?>
+public class GetGenrePlaylistsByIdEndpoint(GenrePlaylistService genrePlaylistService) : EndpointWithoutRequest<GenrePlaylistDTO?>
 {
-    private readonly AppDbContext _appDbContext = appDbContext;
+    private readonly GenrePlaylistService _genrePlaylistService = genrePlaylistService;
 
     public override void Configure()
     {
@@ -22,33 +20,7 @@ public class GetGenrePlaylistsByIdEndpoint(AppDbContext appDbContext) : Endpoint
     {
         var id = Route<long>("id");
 
-        var email = HttpContext.User.Claims.
-         FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value!;
-        var userId = await _appDbContext.AppUsers.Where(x => x.Email == email)
-                .Select(x => x.UserProfile!.Id)
-                .SingleOrDefaultAsync(ct);
-
-        var playlist = await _appDbContext.Playlists.Where(x => x.Id == id).Select(x => new GenrePlaylistDTO
-        {
-            Id = x.Id,
-            CoverPath = x.CoverPath,
-            Name = x.Name,
-            Songs = x.Songs.Select(s => new TrackForPlaylistDTO
-            {
-                Id = s.Id,
-                SongPath = s.SongPath,
-                SongName = s.SongName,
-                Duration = s.Duration,
-                IsFavorite = s.UserSongs.Any(us => us.UserId == userId),
-                CoverPath = s.Album!.CoverPath,
-                ListeningCount = s.ListeningCount,
-                Artists = s.Artists.Select(x => new ShortArtistDTO
-                {
-                    ArtistName = x.ArtistName,
-                    Id = x.Id,
-                }).ToList(),
-            }).ToList()
-        }).SingleOrDefaultAsync(ct);
+        var playlist = await _genrePlaylistService.GetByIdAsync(id, HttpContext.User, ct);
 
         if (playlist == null)
         {

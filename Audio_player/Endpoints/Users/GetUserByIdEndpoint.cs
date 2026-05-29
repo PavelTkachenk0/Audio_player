@@ -1,14 +1,13 @@
-﻿using Audio_player.Constants;
-using Audio_player.DAL;
+using Audio_player.Constants;
 using Audio_player.Models.DTOs;
+using Audio_player.Services;
 using FastEndpoints;
-using Microsoft.EntityFrameworkCore;
 
 namespace Audio_player.Endpoints.Users;
 
-public class GetUserByIdEndpoint(AppDbContext appDbContext) : EndpointWithoutRequest<UserDTO?>
+public class GetUserByIdEndpoint(UserService userService) : EndpointWithoutRequest<UserDTO?>
 {
-    private readonly AppDbContext _appDbContext = appDbContext;
+    private readonly UserService _userService = userService;
 
     public override void Configure()
     {
@@ -21,14 +20,7 @@ public class GetUserByIdEndpoint(AppDbContext appDbContext) : EndpointWithoutReq
     {
         var id = Route<long>("id");
 
-        var user = await _appDbContext.AppUsers.Where(x => x.Id == id).Select(x => new UserDTO
-        {
-            Id = x.Id,
-            Email = x.Email,
-            Birthday = x.UserProfile!.Birthdate,
-            Surname = x.UserProfile!.Surname,
-            Name = x.UserProfile!.Name,
-        }).SingleOrDefaultAsync(ct);
+        var user = await _userService.GetByIdAsync(id, ct);
 
         if (user == null)
         {

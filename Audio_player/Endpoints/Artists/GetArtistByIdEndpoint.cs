@@ -1,17 +1,13 @@
-﻿using Audio_player.Constants;
-using Audio_player.DAL;
+using Audio_player.Constants;
 using Audio_player.Models.DTOs;
-using Audio_player.Models.Responses;
+using Audio_player.Services;
 using FastEndpoints;
-using Microsoft.EntityFrameworkCore;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 
 namespace Audio_player.Endpoints.Artists;
 
-public class GetArtistByIdEndpoint(AppDbContext appDbContext) : EndpointWithoutRequest<ArtistDTO?>
+public class GetArtistByIdEndpoint(ArtistService artistService) : EndpointWithoutRequest<ArtistDTO?>
 {
-    private readonly AppDbContext _appDbContext = appDbContext;
+    private readonly ArtistService _artistService = artistService;
 
     public override void Configure()
     {
@@ -24,25 +20,7 @@ public class GetArtistByIdEndpoint(AppDbContext appDbContext) : EndpointWithoutR
     {
         var id = Route<long>("id");
 
-        var email = HttpContext.User.Claims.
-            FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value!;
-        var userId = await _appDbContext.AppUsers.Where(x => x.Email == email)
-                .Select(x => x.UserProfile!.Id)
-                .SingleOrDefaultAsync(ct);
-
-        var artist = await _appDbContext.Artists.Where(x => x.Id == id).Select(x => new ArtistDTO
-        {
-            ArtistName = x.ArtistName,
-            CoverPath = x.CoverPath,
-            AvatarPath = x.AvatarPath,
-            IsFavorite = x.UserArtists.Any(x => x.UserId == userId),
-            Id = x.Id,
-            Genres = x.Genres.Select(x => new ShortGenreDTO
-            {
-                Id = x.Id,
-                Name = x.Name
-            }).ToList()
-        }).SingleOrDefaultAsync(ct);
+        var artist = await _artistService.GetByIdAsync(id, HttpContext.User, ct);
 
         if (artist == null)
         {
