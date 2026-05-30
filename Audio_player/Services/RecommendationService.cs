@@ -23,8 +23,8 @@ public class RecommendationService(AppDbContext appDbContext)
 
         var items = await query
             .OrderByDescending(x => x.ListeningCount)
-            .Skip((int)(req.Skip == null ? 0 : req.Skip!))
-            .Take((int)(req.Take == null ? 10 : req.Take!))
+            .Skip(req.Skip ?? 0)
+            .Take(req.Take ?? 10)
             .EntityToDto(userId)
             .ToListAsync(ct);
 
@@ -42,8 +42,8 @@ public class RecommendationService(AppDbContext appDbContext)
 
         var items = await query
             .OrderBy(x => x.Id)
-            .Skip((int)(req.Skip == null ? 0 : req.Skip!))
-            .Take((int)(req.Take == null ? 10 : req.Take!))
+            .Skip(req.Skip ?? 0)
+            .Take(req.Take ?? 10)
             .EntityToDto(userId)
             .ToListAsync(ct);
 
@@ -61,8 +61,8 @@ public class RecommendationService(AppDbContext appDbContext)
 
         var items = await query
             .OrderBy(x => x.Id)
-            .Skip((int)(req.Skip == null ? 0 : req.Skip!))
-            .Take((int)(req.Take == null ? 10 : req.Take!))
+            .Skip(req.Skip ?? 0)
+            .Take(req.Take ?? 10)
             .EntityToDto(userId)
             .ToListAsync(ct);
 
@@ -79,14 +79,10 @@ public class RecommendationService(AppDbContext appDbContext)
 
         var items = await query
             .OrderBy(x => x.Id)
-            .Skip((int)(req.Skip == null ? 0 : req.Skip!))
-            .Take((int)(req.Take == null ? 10 : req.Take!))
-            .Select(x => new ShortGenrePlaylistDTO
-            {
-                Id = x.Id,
-                CoverPath = x.CoverPath,
-                Name = x.Name,
-            }).ToListAsync(ct);
+            .Skip(req.Skip ?? 0)
+            .Take(req.Take ?? 10)
+            .EntityToShortDto()
+            .ToListAsync(ct);
 
         return (items, totalCount);
     }

@@ -17,7 +17,7 @@ public class PostGenreEndpoint(GenreService genreService) : Endpoint<CreateGenre
         Policies(PolicyNames.HasAdminRole);
     }
 
-    public async override Task HandleAsync(CreateGenreRequest req, CancellationToken ct)
+    public override async Task HandleAsync(CreateGenreRequest req, CancellationToken ct)
     {
         await _genreService.CreateAsync(req, ct);
         await SendOkAsync(ct);

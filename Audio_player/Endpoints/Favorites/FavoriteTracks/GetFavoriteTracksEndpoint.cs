@@ -1,4 +1,3 @@
-using Audio_player.Endpoints.Favorites.Tracks;
 using Audio_player.Models.Responses;
 using Audio_player.Services;
 using FastEndpoints;

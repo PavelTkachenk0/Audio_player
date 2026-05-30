@@ -11,7 +11,7 @@ public class GetFavoritePlaylistsEndpoint(FavoriteService favoriteService) : End
     public override void Configure()
     {
         Get("");
-        Group<FavoritePlaylistGroup>();
+        Group<FavoritePlaylistsGroup>();
     }
 
     public override async Task<GetFavoritePlaylistsResponse> ExecuteAsync(CancellationToken ct)

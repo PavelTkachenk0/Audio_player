@@ -32,4 +32,14 @@ public static class PlaylistMapper
                 }).ToList(),
             }).ToList()
         });
+
+    /// <summary>Trimmed Playlist → ShortGenrePlaylistDTO projection (no songs); shared by the
+    /// favorites list, the genre-playlists list and the playlist recommendations.</summary>
+    public static IQueryable<ShortGenrePlaylistDTO> EntityToShortDto(this IQueryable<Playlist> playlists) =>
+        playlists.Select(x => new ShortGenrePlaylistDTO
+        {
+            Id = x.Id,
+            Name = x.Name,
+            CoverPath = x.CoverPath
+        });
 }

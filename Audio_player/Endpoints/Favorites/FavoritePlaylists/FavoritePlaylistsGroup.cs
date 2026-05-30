@@ -2,9 +2,9 @@
 
 namespace Audio_player.Endpoints.Favorites.FavoritePlaylists;
 
-public class FavoritePlaylistGroup : SubGroup<FavoritesGroup>
+public class FavoritePlaylistsGroup : SubGroup<FavoritesGroup>
 {
-    public FavoritePlaylistGroup()
+    public FavoritePlaylistsGroup()
     {
         Configure("playlists", ep => { });
     }

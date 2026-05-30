@@ -40,20 +40,8 @@ public class TrackService(AppDbContext appDbContext, FileService fileService)
 
         return await _appDbContext.Songs
             .Where(x => x.AlbumId == albumId)
-            .Select(x => new TrackByAlbumIdDTO
-            {
-                Id = x.Id,
-                Duration = x.Duration,
-                IsFavorite = x.UserSongs.Any(us => us.UserId == userId),
-                ListeningCount = x.ListeningCount,
-                SongName = x.SongName,
-                SongPath = x.SongPath,
-                Artists = x.Artists.Select(a => new ShortArtistDTO
-                {
-                    ArtistName = a.ArtistName,
-                    Id = a.Id,
-                }).ToList()
-            }).ToListAsync(ct);
+            .EntityToByAlbumIdDto(userId)
+            .ToListAsync(ct);
     }
 
     public async Task CreateAsync(PostTrackRequest req, CancellationToken ct)

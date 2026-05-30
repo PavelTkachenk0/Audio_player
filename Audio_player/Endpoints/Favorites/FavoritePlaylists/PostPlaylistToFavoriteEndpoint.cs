@@ -11,7 +11,7 @@ public class PostPlaylistToFavoriteEndpoint(FavoriteService favoriteService) : E
     public override void Configure()
     {
         Post("{id:int}");
-        Group<FavoritePlaylistGroup>();
+        Group<FavoritePlaylistsGroup>();
     }
 
     public override async Task<FavoriteResponse> ExecuteAsync(CancellationToken ct)

@@ -167,12 +167,8 @@ public class FavoriteService(AppDbContext appDbContext)
 
         return await _appDbContext.Playlists
             .Where(x => x.UserPlaylists.Any(up => up.UserId == userId))
-            .Select(x => new ShortGenrePlaylistDTO
-            {
-                CoverPath = x.CoverPath,
-                Id = x.Id,
-                Name = x.Name
-            }).ToListAsync(ct);
+            .EntityToShortDto()
+            .ToListAsync(ct);
     }
 
     public async Task<bool> AddPlaylistAsync(long playlistId, ClaimsPrincipal user, CancellationToken ct)

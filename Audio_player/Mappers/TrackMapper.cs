@@ -36,4 +36,18 @@ public static class TrackMapper
                 Id = a.Id
             }).ToList()
         });
+
+    /// <summary>Trimmed Song → TrackByAlbumIdDTO projection for the album's track listing
+    /// (no Album/Genres). IsFavorite is per-user scoped.</summary>
+    public static IQueryable<TrackByAlbumIdDTO> EntityToByAlbumIdDto(this IQueryable<Song> songs, long userId) =>
+        songs.Select(x => new TrackByAlbumIdDTO
+        {
+            Id = x.Id,
+            Duration = x.Duration,
+            ListeningCount = x.ListeningCount,
+            SongName = x.SongName,
+            SongPath = x.SongPath,
+            IsFavorite = x.UserSongs.Any(us => us.UserId == userId),
+            Artists = x.Artists.Select(a => new ShortArtistDTO { ArtistName = a.ArtistName, Id = a.Id }).ToList()
+        });
 }

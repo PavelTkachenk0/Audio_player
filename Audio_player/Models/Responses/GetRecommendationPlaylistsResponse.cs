@@ -2,7 +2,7 @@
 
 namespace Audio_player.Models.Responses;
 
-public class GetRecommendationPlaylistsResposne : BaseListResponse<ShortGenrePlaylistDTO>
+public class GetRecommendationPlaylistsResponse : BaseListResponse<ShortGenrePlaylistDTO>
 {
     public long TotalCount { get; set; }
 }

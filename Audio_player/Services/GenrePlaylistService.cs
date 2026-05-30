@@ -18,12 +18,7 @@ public class GenrePlaylistService(AppDbContext appDbContext, FileService fileSer
     {
         return await _appDbContext.Playlists
             .Where(x => x.IsAdmin)
-            .Select(x => new ShortGenrePlaylistDTO
-            {
-                CoverPath = x.CoverPath,
-                Id = x.Id,
-                Name = x.Name
-            })
+            .EntityToShortDto()
             .ToListAsync(ct);
     }
 

@@ -11,7 +11,7 @@ public class DeletePlaylistFromFavoriteEndpoint(FavoriteService favoriteService)
     public override void Configure()
     {
         Delete("{id:int}");
-        Group<FavoritePlaylistGroup>();
+        Group<FavoritePlaylistsGroup>();
     }
 
     public override async Task<FavoriteResponse> ExecuteAsync(CancellationToken ct)

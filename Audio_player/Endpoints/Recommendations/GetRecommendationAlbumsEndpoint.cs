@@ -6,7 +6,7 @@ using FastEndpoints;
 
 namespace Audio_player.Endpoints.Recommendations;
 
-public class GetRecommendationAlbumsEndpointI(RecommendationService recommendationService) : Endpoint<RecommendationRequest, RecommendationAlbumsResponse>
+public class GetRecommendationAlbumsEndpoint(RecommendationService recommendationService) : Endpoint<RecommendationRequest, GetRecommendationAlbumsResponse>
 {
     private readonly RecommendationService _recommendationService = recommendationService;
 
@@ -17,11 +17,11 @@ public class GetRecommendationAlbumsEndpointI(RecommendationService recommendati
         Policies(PolicyNames.HasAdminOrUserRole);
     }
 
-    public override async Task<RecommendationAlbumsResponse> ExecuteAsync(RecommendationRequest req, CancellationToken ct)
+    public override async Task<GetRecommendationAlbumsResponse> ExecuteAsync(RecommendationRequest req, CancellationToken ct)
     {
         var (result, totalCount) = await _recommendationService.GetAlbumsAsync(req, HttpContext.User, ct);
 
-        return new RecommendationAlbumsResponse
+        return new GetRecommendationAlbumsResponse
         {
             Result = result,
             TotalCount = totalCount
