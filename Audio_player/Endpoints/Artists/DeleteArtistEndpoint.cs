@@ -1,15 +1,12 @@
-﻿using Audio_player.Constants;
-using Audio_player.DAL;
+using Audio_player.Constants;
 using Audio_player.Services;
 using FastEndpoints;
-using Microsoft.EntityFrameworkCore;
 
 namespace Audio_player.Endpoints.Artists;
 
-public class DeleteArtistEndpoint(AppDbContext appDbContext, FileService fileService) : EndpointWithoutRequest
+public class DeleteArtistEndpoint(ArtistService artistService) : EndpointWithoutRequest
 {
-    private readonly AppDbContext _appDbContext = appDbContext;
-    private readonly FileService _fileService = fileService;
+    private readonly ArtistService _artistService = artistService;
 
     public override void Configure()
     {
@@ -22,20 +19,12 @@ public class DeleteArtistEndpoint(AppDbContext appDbContext, FileService fileSer
     {
         var id = Route<long>("id");
 
-        var artist = await _appDbContext.Artists.SingleOrDefaultAsync(x => x.Id == id, ct);
-
-        if (artist == null)
+        if (!await _artistService.DeleteAsync(id, ct))
         {
             await SendNotFoundAsync(ct);
             return;
         }
 
-        _appDbContext.Artists.Remove(artist);
-
-        _fileService.DeleteFile(artist.CoverPath);
-        _fileService.DeleteFile(artist.AvatarPath);
-        
-        await _appDbContext.SaveChangesAsync(ct);
         await SendOkAsync(ct);
     }
 }

@@ -48,6 +48,8 @@ namespace Audio_player.DAL.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Jti");
+
                     b.HasIndex("UserId");
 
                     b.ToTable("AccessTokens");
@@ -367,6 +369,8 @@ namespace Audio_player.DAL.Migrations
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Token");
 
                     b.HasIndex("UserId");
 

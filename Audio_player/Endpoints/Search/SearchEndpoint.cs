@@ -1,17 +1,14 @@
-﻿using Audio_player.Constants;
-using Audio_player.DAL;
-using Audio_player.DAL.Models;
-using Audio_player.Models.DTOs;
+using Audio_player.Constants;
 using Audio_player.Models.Requests;
 using Audio_player.Models.Responses;
+using Audio_player.Services;
 using FastEndpoints;
-using Microsoft.EntityFrameworkCore;
 
 namespace Audio_player.Endpoints.Search;
 
-public class SearchEndpoint(AppDbContext appDbContext) : Endpoint<SearchTermRequest, SearchResponse>
+public class SearchEndpoint(SearchService searchService) : Endpoint<SearchTermRequest, SearchResponse>
 {
-    private readonly AppDbContext _appDbContext = appDbContext;
+    private readonly SearchService _searchService = searchService;
 
     public override void Configure()
     {
@@ -22,31 +19,7 @@ public class SearchEndpoint(AppDbContext appDbContext) : Endpoint<SearchTermRequ
 
     public override async Task<SearchResponse> ExecuteAsync(SearchTermRequest req, CancellationToken ct)
     {
-        var searchResult = await _appDbContext.Albums
-            .Where(al => EF.Functions.ILike(al.AlbumName, $"%{req.SearchTerm}%"))
-            .Select(al => new SearchDTO
-            {
-                CoverPath = al.CoverPath,
-                Name = al.AlbumName,
-                Source = nameof(Album),
-                Id = al.Id
-            }).Union(_appDbContext.Songs
-                        .Where(s => EF.Functions.ILike(s.SongName, $"%{req.SearchTerm}%"))
-                        .Select(s => new SearchDTO
-                        {
-                            Id = s.Id,
-                            Name = s.SongName,
-                            Source = nameof(Song),
-                            CoverPath = s.Album!.CoverPath
-                        })).Union(_appDbContext.Artists
-                                .Where(x => EF.Functions.ILike(x.ArtistName, $"%{req.SearchTerm}%"))
-                                .Select(ar => new SearchDTO
-                                {
-                                    Id = ar.Id,
-                                    Source = nameof(Artist),
-                                    CoverPath = ar.AvatarPath,
-                                    Name = ar.ArtistName
-                                })).ToListAsync(ct);
+        var searchResult = await _searchService.SearchAsync(req.SearchTerm, ct);
 
         return new SearchResponse
         {

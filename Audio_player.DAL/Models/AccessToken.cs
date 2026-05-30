@@ -18,5 +18,7 @@ public class AccessTokenConfig : IEntityTypeConfiguration<AccessToken>
     {
         builder.Property(x => x.Jti).HasMaxLength(256);
         builder.Property(x => x.IsRevoked).HasDefaultValue(false);
+
+        builder.HasIndex(x => x.Jti);
     }
 }

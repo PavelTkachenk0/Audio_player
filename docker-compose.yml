@@ -1,0 +1,54 @@
+# =============================================================================
+# DEV-ONLY compose file.
+# Every secret, password and signing key below is a non-production placeholder.
+# Override ALL of them (DB credentials, AuthOptions__Key, etc.) via a .env file
+# or your orchestrator's secret store before deploying anywhere real.
+# =============================================================================
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-audio_player}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-audio_player_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-audio_player}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      # Wait until Postgres can actually accept connections for our user/db,
+      # so the api service's depends_on can gate on a truly ready database.
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-audio_player} -d ${POSTGRES_DB:-audio_player}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  api:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      # Run in Development so Program.cs skips UseHttpsRedirection (only HTTP/8080 is exposed here).
+      ASPNETCORE_ENVIRONMENT: Development
+
+      # Config is passed with DOUBLE-UNDERSCORE keys that ASP.NET Core maps onto
+      # nested configuration sections (e.g. ConnectionStrings:Audio_player).
+      ConnectionStrings__Audio_player: "Host=db;Port=5432;Database=${POSTGRES_DB:-audio_player};Username=${POSTGRES_USER:-audio_player};Password=${POSTGRES_PASSWORD:-audio_player_dev_password}"
+
+      # DEV-ONLY signing key. MUST be overridden in any real deployment.
+      AuthOptions__Key: "dev_only_super_secret_signing_key_change_me_before_deploying_to_production_0123456789"
+      AuthOptions__Issuer: "Stream_service_backend"
+      AuthOptions__Audience: "Stream_service_frontend"
+
+      # Uploaded media lives on a named volume mounted at /data.
+      ImageStore__FilesPath: /data/images
+      AudioStore__FilesPath: /data/audio
+    volumes:
+      - media:/data
+
+volumes:
+  pgdata:
+  media:

@@ -1,15 +1,12 @@
-﻿using Audio_player.Constants;
-using Audio_player.DAL;
 using Audio_player.Models.Responses;
+using Audio_player.Services;
 using FastEndpoints;
-using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 
 namespace Audio_player.Endpoints.Favorites.FavoriteAlbums;
 
-public class DeleteAlbumFromFavoriteEndpoint(AppDbContext appDbContext) : EndpointWithoutRequest<FavoriteResponse>
+public class DeleteAlbumFromFavoriteEndpoint(FavoriteService favoriteService) : EndpointWithoutRequest<FavoriteResponse>
 {
-    private readonly AppDbContext _appDbContext = appDbContext;
+    private readonly FavoriteService _favoriteService = favoriteService;
 
     public override void Configure()
     {
@@ -21,15 +18,7 @@ public class DeleteAlbumFromFavoriteEndpoint(AppDbContext appDbContext) : Endpoi
     {
         var albumId = Route<long>("id");
 
-        var email = HttpContext.User.Claims.
-          FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value!;
-        var userId = await _appDbContext.AppUsers.Where(x => x.Email == email)
-                .Select(x => x.UserProfile!.Id)
-        .SingleOrDefaultAsync(ct);
-
-        var album = await _appDbContext.UserAlbums.SingleOrDefaultAsync(x => x.UserId == userId && x.AlbumId == albumId, ct);
-
-        if (album == null)
+        if (!await _favoriteService.RemoveAlbumAsync(albumId, HttpContext.User, ct))
         {
             await SendNotFoundAsync(ct);
             return new FavoriteResponse
@@ -37,10 +26,6 @@ public class DeleteAlbumFromFavoriteEndpoint(AppDbContext appDbContext) : Endpoi
                 Added = false
             };
         }
-
-        _appDbContext.UserAlbums.Remove(album);
-
-        await _appDbContext.SaveChangesAsync(ct);
 
         return new FavoriteResponse
         {

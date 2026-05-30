@@ -1,14 +1,12 @@
-﻿using Audio_player.Constants;
-using Audio_player.DAL;
+using Audio_player.Constants;
+using Audio_player.Services;
 using FastEndpoints;
-using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 
 namespace Audio_player.Endpoints.Users;
 
-public class DeleteUserEndpoint(AppDbContext appDbContext) : EndpointWithoutRequest
+public class DeleteUserEndpoint(UserService userService) : EndpointWithoutRequest
 {
-    private readonly AppDbContext _appDbContext = appDbContext;
+    private readonly UserService _userService = userService;
 
     public override void Configure()
     {
@@ -21,24 +19,19 @@ public class DeleteUserEndpoint(AppDbContext appDbContext) : EndpointWithoutRequ
     {
         var id = Route<long>("id");
 
-        var user = await _appDbContext.AppUsers.SingleOrDefaultAsync(x => x.Id == id, ct);
+        var result = await _userService.DeleteAsync(id, HttpContext.User, ct);
 
-        if (user == null)
+        switch (result)
         {
-            await SendNotFoundAsync(ct);
-            return;
+            case DeleteUserResult.NotFound:
+                await SendNotFoundAsync(ct);
+                return;
+            case DeleteUserResult.SelfDeletion:
+                await SendStringAsync("impossible_to_delete_yourself", 400, cancellation: ct);
+                return;
+            default:
+                await SendOkAsync(ct);
+                return;
         }
-
-        if (user.Email == HttpContext.User.Claims.
-            FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value!)
-        {
-            await SendStringAsync("impossible_to_delete_yourself", 400, cancellation: ct);
-            return;
-        }
-
-        _appDbContext.AppUsers.Remove(user);
-        await _appDbContext.SaveChangesAsync(ct);
-
-        await SendOkAsync(ct);
     }
 }

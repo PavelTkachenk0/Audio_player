@@ -1,16 +1,12 @@
-﻿using Audio_player.Constants;
-using Audio_player.DAL;
-using Audio_player.Endpoints.Favorites.Tracks;
 using Audio_player.Models.Responses;
+using Audio_player.Services;
 using FastEndpoints;
-using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 
 namespace Audio_player.Endpoints.Favorites.FavoriteTracks;
 
-public class PostTrackToFavoriteEndpoint(AppDbContext appDbContext) : EndpointWithoutRequest<FavoriteResponse>
+public class PostTrackToFavoriteEndpoint(FavoriteService favoriteService) : EndpointWithoutRequest<FavoriteResponse>
 {
-    private readonly AppDbContext _appDbContext = appDbContext;
+    private readonly FavoriteService _favoriteService = favoriteService;
 
     public override void Configure()
     {
@@ -22,7 +18,7 @@ public class PostTrackToFavoriteEndpoint(AppDbContext appDbContext) : EndpointWi
     {
         var trackId = Route<long>("id");
 
-        if (!_appDbContext.Songs.Any(x => x.Id == trackId))
+        if (!await _favoriteService.AddTrackAsync(trackId, HttpContext.User, ct))
         {
             await SendNotFoundAsync(ct);
             return new FavoriteResponse
@@ -30,20 +26,6 @@ public class PostTrackToFavoriteEndpoint(AppDbContext appDbContext) : EndpointWi
                 Added = false
             };
         }
-
-        var email = HttpContext.User.Claims.
-          FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value!;
-        var userId = await _appDbContext.AppUsers.Where(x => x.Email == email)
-                .Select(x => x.UserProfile!.Id)
-                .SingleOrDefaultAsync(ct);
-
-        _appDbContext.UserSongs.Add(new DAL.Models.UserSongs
-        {
-            SongId = trackId,
-            UserId = userId
-        });
-
-        await _appDbContext.SaveChangesAsync(ct);
 
         return new FavoriteResponse
         {

@@ -1,15 +1,12 @@
-﻿using Audio_player.Constants;
-using Audio_player.DAL;
+using Audio_player.Constants;
 using Audio_player.Services;
 using FastEndpoints;
-using Microsoft.EntityFrameworkCore;
 
 namespace Audio_player.Endpoints.Tracks;
 
-public class DeleteTrackEndpoint(AppDbContext appDbContext, FileService fileService) : EndpointWithoutRequest
+public class DeleteTrackEndpoint(TrackService trackService) : EndpointWithoutRequest
 {
-    private readonly AppDbContext _appDbContext = appDbContext;
-    private readonly FileService _fileService = fileService;
+    private readonly TrackService _trackService = trackService;
 
     public override void Configure()
     {
@@ -22,19 +19,11 @@ public class DeleteTrackEndpoint(AppDbContext appDbContext, FileService fileServ
     {
         var id = Route<long>("id");
 
-        var track = await _appDbContext.Songs.SingleOrDefaultAsync(x => x.Id == id, ct);
-
-        if (track == null)
+        if (!await _trackService.DeleteAsync(id, ct))
         {
             await SendNotFoundAsync(ct);
             return;
         }
-
-        _appDbContext.Songs.Remove(track);
-
-        _fileService.DeleteFile(track.SongPath);
-
-        await _appDbContext.SaveChangesAsync(ct);
 
         await SendOkAsync(ct);
     }

@@ -2,5 +2,7 @@
 
 public class TokenResponse
 {
-    public string AccessToken { get; set; } = null!;
+    public string? AccessToken { get; set; }
+    public bool RequiresTwoFactor { get; set; }
+    public string? TwoFactorToken { get; set; }
 }

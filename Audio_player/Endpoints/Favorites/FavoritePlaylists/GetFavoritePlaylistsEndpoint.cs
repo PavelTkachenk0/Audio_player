@@ -1,29 +1,22 @@
-﻿using Audio_player.DAL;
-using Audio_player.Models.DTOs;
 using Audio_player.Models.Responses;
+using Audio_player.Services;
 using FastEndpoints;
-using Microsoft.EntityFrameworkCore;
 
 namespace Audio_player.Endpoints.Favorites.FavoritePlaylists;
 
-public class GetFavoritePlaylistsEndpoint(AppDbContext appDbContext) : EndpointWithoutRequest<GetFavoritePlaylistsResponse>
+public class GetFavoritePlaylistsEndpoint(FavoriteService favoriteService) : EndpointWithoutRequest<GetFavoritePlaylistsResponse>
 {
-    private readonly AppDbContext _appDbContext = appDbContext;
+    private readonly FavoriteService _favoriteService = favoriteService;
 
     public override void Configure()
     {
         Get("");
-        Group<FavoritePlaylistGroup>();
+        Group<FavoritePlaylistsGroup>();
     }
 
     public override async Task<GetFavoritePlaylistsResponse> ExecuteAsync(CancellationToken ct)
     {
-        var playlists = await _appDbContext.Playlists.Where(x => x.IsAdmin).Select(x => new ShortGenrePlaylistDTO
-        {
-            CoverPath = x.CoverPath,
-            Id = x.Id,
-            Name = x.Name
-        }).ToListAsync(ct);
+        var playlists = await _favoriteService.GetFavoritePlaylistsAsync(HttpContext.User, ct);
 
         return new GetFavoritePlaylistsResponse
         {

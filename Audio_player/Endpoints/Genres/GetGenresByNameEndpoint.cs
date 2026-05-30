@@ -1,16 +1,14 @@
-﻿using Audio_player.Constants;
-using Audio_player.DAL;
-using Audio_player.Models.DTOs;
+using Audio_player.Constants;
 using Audio_player.Models.Requests;
 using Audio_player.Models.Responses;
+using Audio_player.Services;
 using FastEndpoints;
-using Microsoft.EntityFrameworkCore;
 
 namespace Audio_player.Endpoints.Genres;
 
-public class GetGenresByNameEndpoint(AppDbContext appDbContext) : Endpoint<GetByNameRequest, GetGenresResponse>
+public class GetGenresByNameEndpoint(GenreService genreService) : Endpoint<GetByNameRequest, GetGenresResponse>
 {
-    private readonly AppDbContext _appDbContext = appDbContext;
+    private readonly GenreService _genreService = genreService;
 
     public override void Configure()
     {
@@ -21,15 +19,7 @@ public class GetGenresByNameEndpoint(AppDbContext appDbContext) : Endpoint<GetBy
 
     public override async Task<GetGenresResponse> ExecuteAsync(GetByNameRequest req, CancellationToken ct)
     {
-        var genres = await _appDbContext.Genres
-            .Where(x => EF.Functions.ILike(x.Name, $"%{req.Name}%"))
-            .Select(x => new GenreDTO
-            {
-                CoverPath = x.CoverPath,
-                Id = x.Id,
-                Name = x.Name
-            })
-            .ToListAsync(ct);
+        var genres = await _genreService.GetByNameAsync(req.Name, ct);
 
         return new GetGenresResponse
         {

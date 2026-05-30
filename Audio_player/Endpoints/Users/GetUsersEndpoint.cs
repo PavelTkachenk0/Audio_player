@@ -1,15 +1,13 @@
-﻿using Audio_player.Constants;
-using Audio_player.DAL;
-using Audio_player.Models.DTOs;
+using Audio_player.Constants;
 using Audio_player.Models.Responses;
+using Audio_player.Services;
 using FastEndpoints;
-using Microsoft.EntityFrameworkCore;
 
 namespace Audio_player.Endpoints.Users;
 
-public class GetUsersEndpoint(AppDbContext appDbContext) : EndpointWithoutRequest<GetUsersResponse>
+public class GetUsersEndpoint(UserService userService) : EndpointWithoutRequest<GetUsersResponse>
 {
-    private readonly AppDbContext _appDbContext = appDbContext;
+    private readonly UserService _userService = userService;
 
     public override void Configure()
     {
@@ -20,14 +18,7 @@ public class GetUsersEndpoint(AppDbContext appDbContext) : EndpointWithoutReques
 
     public override async Task<GetUsersResponse> ExecuteAsync(CancellationToken ct)
     {
-        var users = await _appDbContext.AppUsers.Select(x => new UserDTO
-        {
-            Id = x.Id,
-            Email = x.Email,
-            Birthday = x.UserProfile!.Birthdate,
-            Name = x.UserProfile!.Name,
-            Surname = x.UserProfile!.Surname
-        }).ToListAsync(ct);
+        var users = await _userService.GetAllAsync(ct);
 
         return new GetUsersResponse
         {

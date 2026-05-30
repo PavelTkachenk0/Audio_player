@@ -1,6 +1,6 @@
 ﻿using FastEndpoints;
 
-namespace Audio_player.Endpoints.Favorites.Tracks;
+namespace Audio_player.Endpoints.Favorites.FavoriteTracks;
 
 public class FavoriteTracksGroup : SubGroup<FavoritesGroup>
 {

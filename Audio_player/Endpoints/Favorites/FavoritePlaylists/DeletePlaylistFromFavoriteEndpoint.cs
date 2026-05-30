@@ -1,35 +1,24 @@
-﻿using Audio_player.Constants;
-using Audio_player.DAL;
 using Audio_player.Models.Responses;
+using Audio_player.Services;
 using FastEndpoints;
-using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 
 namespace Audio_player.Endpoints.Favorites.FavoritePlaylists;
 
-public class DeletePlaylistFromFavoriteEndpoint(AppDbContext appDbContext) : EndpointWithoutRequest<FavoriteResponse>
+public class DeletePlaylistFromFavoriteEndpoint(FavoriteService favoriteService) : EndpointWithoutRequest<FavoriteResponse>
 {
-    private readonly AppDbContext _appDbContext = appDbContext;
+    private readonly FavoriteService _favoriteService = favoriteService;
 
     public override void Configure()
     {
         Delete("{id:int}");
-        Group<FavoritePlaylistGroup>();
+        Group<FavoritePlaylistsGroup>();
     }
 
     public override async Task<FavoriteResponse> ExecuteAsync(CancellationToken ct)
     {
         var playlistId = Route<long>("id");
 
-        var email = HttpContext.User.Claims.
-          FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value!;
-        var userId = await _appDbContext.AppUsers.Where(x => x.Email == email)
-                .Select(x => x.UserProfile!.Id)
-        .SingleOrDefaultAsync(ct);
-
-        var playlist = await _appDbContext.UserPlaylists.SingleOrDefaultAsync(x => x.UserId == userId && x.PlaylistId == playlistId, ct);
-
-        if (playlist == null)
+        if (!await _favoriteService.RemovePlaylistAsync(playlistId, HttpContext.User, ct))
         {
             await SendNotFoundAsync(ct);
             return new FavoriteResponse
@@ -37,10 +26,6 @@ public class DeletePlaylistFromFavoriteEndpoint(AppDbContext appDbContext) : End
                 Added = false
             };
         }
-
-        _appDbContext.UserPlaylists.Remove(playlist);
-
-        await _appDbContext.SaveChangesAsync(ct);
 
         return new FavoriteResponse
         {
