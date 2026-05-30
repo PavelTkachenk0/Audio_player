@@ -1,6 +1,3 @@
-﻿using Audio_player.DAL;
-using Audio_player.DAL.Models;
-using Audio_player.Helpers;
 using Audio_player.Models.Requests;
 using Audio_player.Models.Responses;
 using Audio_player.Services;
@@ -8,11 +5,9 @@ using FastEndpoints;
 
 namespace Audio_player.Endpoints.Authentication;
 
-public class RegisterEndpoint(AppDbContext appDbContext, GenerateTokenService tokenService, IPasswordHasher passwordHasher) : Endpoint<RegisterRequest, TokenResponse>
+public class RegisterEndpoint(AuthService authService) : Endpoint<RegisterRequest, TokenResponse>
 {
-    private readonly GenerateTokenService _tokenService = tokenService;
-    private readonly AppDbContext _appDbContext = appDbContext;
-    private readonly IPasswordHasher _passwordHasher = passwordHasher;
+    private readonly AuthService _authService = authService;
 
     public override void Configure()
     {
@@ -21,36 +16,6 @@ public class RegisterEndpoint(AppDbContext appDbContext, GenerateTokenService to
         AllowAnonymous();
     }
 
-    public override async Task<TokenResponse> ExecuteAsync(RegisterRequest req, CancellationToken ct)
-    {
-        var user = _appDbContext.AppUsers.Add(new DAL.Models.AppUser
-        {
-            Email = req.Email,
-            Password = _passwordHasher.Hash(req.Password),
-            UserProfile = new DAL.Models.UserProfile
-            {
-                Birthdate = req.Birthday,
-                Name = req.Name,
-                Surname = req.Surname
-            }, 
-            UserRoles = 
-            [
-                new AppUserRole
-                {
-                    RoleId = 1
-                }
-            ]
-        });
-
-        await _appDbContext.SaveChangesAsync(ct);
-
-        var accessToken = await _tokenService.GenerateAccessToken(user.Entity.Email, ct);
-
-        await _tokenService.SetRefreshTokenCookieAsync(HttpContext.Response, user.Entity.Email, ct);
-
-        return new TokenResponse
-        {
-            AccessToken = accessToken
-        };
-    }
+    public override Task<TokenResponse> ExecuteAsync(RegisterRequest req, CancellationToken ct)
+        => _authService.RegisterAsync(req, HttpContext.Response, ct);
 }

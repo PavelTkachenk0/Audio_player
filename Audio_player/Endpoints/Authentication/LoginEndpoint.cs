@@ -1,18 +1,13 @@
-﻿using Audio_player.DAL;
-using Audio_player.Helpers;
 using Audio_player.Models.Requests;
 using Audio_player.Models.Responses;
 using Audio_player.Services;
 using FastEndpoints;
-using Microsoft.EntityFrameworkCore;
 
 namespace Audio_player.Endpoints.Authentication;
 
-public class LoginEndpoint(AppDbContext appDbContext, GenerateTokenService tokenService, IPasswordHasher passwordHasher) : Endpoint<LoginRequest, TokenResponse>
+public class LoginEndpoint(AuthService authService) : Endpoint<LoginRequest, TokenResponse>
 {
-    private readonly GenerateTokenService _tokenService = tokenService;
-    private readonly AppDbContext _appDbContext = appDbContext;
-    private readonly IPasswordHasher _passwordHasher = passwordHasher;
+    private readonly AuthService _authService = authService;
 
     public override void Configure()
     {
@@ -23,29 +18,13 @@ public class LoginEndpoint(AppDbContext appDbContext, GenerateTokenService token
 
     public override async Task<TokenResponse> ExecuteAsync(LoginRequest req, CancellationToken ct)
     {
-        var user = await _appDbContext.AppUsers.SingleOrDefaultAsync(x => x.Email == req.Email, ct);
+        var result = await _authService.LoginAsync(req, HttpContext.Response, ct);
 
-        if (user == null || !_passwordHasher.Verify(req.Password, user.Password))
+        if (result == null)
         {
             ThrowError("invalid_login_or_password");
         }
 
-        if (user.IsTwoFactorEnable)
-        {
-            return new TokenResponse
-            {
-                RequiresTwoFactor = true,
-                TwoFactorToken = _tokenService.GenerateTwoFactorPendingToken(user.Email)
-            };
-        }
-
-        var accessToken = await _tokenService.GenerateAccessToken(user.Email, ct);
-
-        await _tokenService.SetRefreshTokenCookieAsync(HttpContext.Response, user.Email, ct);
-
-        return new TokenResponse
-        {
-            AccessToken = accessToken
-        };
+        return result;
     }
 }

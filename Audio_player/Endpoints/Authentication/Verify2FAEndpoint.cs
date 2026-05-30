@@ -1,18 +1,13 @@
-﻿using Audio_player.DAL;
-using Audio_player.Helpers;
 using Audio_player.Models.Requests;
 using Audio_player.Models.Responses;
+using Audio_player.Services;
 using FastEndpoints;
-using Microsoft.EntityFrameworkCore;
-using OtpNet;
-using System.Security.Claims;
 
 namespace Audio_player.Endpoints.Authentication;
 
-public class Verify2FAEndpoint(AppDbContext appDbContext, GenerateTokenService tokenService) : Endpoint<Verify2FARequest, TokenResponse?>
+public class Verify2FAEndpoint(AuthService authService) : Endpoint<Verify2FARequest, TokenResponse?>
 {
-    private readonly AppDbContext _appDbContext = appDbContext;
-    private readonly GenerateTokenService _tokenService = tokenService;
+    private readonly AuthService _authService = authService;
 
     public override void Configure()
     {
@@ -23,39 +18,14 @@ public class Verify2FAEndpoint(AppDbContext appDbContext, GenerateTokenService t
 
     public override async Task<TokenResponse?> ExecuteAsync(Verify2FARequest req, CancellationToken ct)
     {
-        var email = _tokenService.ValidateTwoFactorPendingToken(req.TwoFactorToken);
+        var result = await _authService.VerifyTwoFactorAsync(req, HttpContext.Response, ct);
 
-        if (email == null)
+        if (result == null)
         {
             await SendUnauthorizedAsync(ct);
             return null;
         }
 
-        var user = await _appDbContext.AppUsers.Where(x => x.Email == email)
-                .SingleOrDefaultAsync(ct);
-
-        if (user == null || string.IsNullOrEmpty(user.TwoFactorSecret))
-        {
-            await SendUnauthorizedAsync(ct);
-            return null;
-        }
-
-        var totp = new Totp(Base32Encoding.ToBytes(user.TwoFactorSecret));
-        bool isValid = totp.VerifyTotp(req.Code, out long _);
-
-        if (!isValid)
-        {
-            await SendUnauthorizedAsync(ct);
-            return null;
-        }
-
-        var accessToken = await _tokenService.GenerateAccessToken(user.Email, ct);
-
-        await _tokenService.SetRefreshTokenCookieAsync(HttpContext.Response, user.Email, ct);
-
-        return new TokenResponse
-        {
-            AccessToken = accessToken
-        };
+        return result;
     }
 }

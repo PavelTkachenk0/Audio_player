@@ -1,15 +1,11 @@
-﻿using Audio_player.DAL;
-using Audio_player.Helpers;
+using Audio_player.Services;
 using FastEndpoints;
-using Microsoft.EntityFrameworkCore;
-using System.IdentityModel.Tokens.Jwt;
 
 namespace Audio_player.Endpoints.Authentication;
 
-public class LogoutEndpoint(AppDbContext appDbContext, GenerateTokenService tokenService) : EndpointWithoutRequest
+public class LogoutEndpoint(AuthService authService) : EndpointWithoutRequest
 {
-    private readonly GenerateTokenService _tokenService = tokenService;
-    private readonly AppDbContext _appDbContext = appDbContext;
+    private readonly AuthService _authService = authService;
 
     public override void Configure()
     {
@@ -22,27 +18,7 @@ public class LogoutEndpoint(AppDbContext appDbContext, GenerateTokenService toke
         var refreshToken = HttpContext.Request.Cookies["refreshToken"];
         var accessToken = HttpContext.Request.Headers.Authorization.ToString().Replace("Bearer ", "");
 
-        if (!string.IsNullOrEmpty(refreshToken))
-        {
-            var tokenData = await _appDbContext.RefreshTokens.SingleOrDefaultAsync(x => x.Token == refreshToken, ct);
-
-            if (tokenData != null)
-            {
-                tokenData.IsRevoked = true;
-                await _appDbContext.SaveChangesAsync(ct);
-            }
-        }
-
-        if (!string.IsNullOrEmpty(accessToken))
-        {
-            var handler = new JwtSecurityTokenHandler();
-            var jwtToken = handler.ReadJwtToken(accessToken);
-            var jti = jwtToken.Claims.First(x => x.Type == JwtRegisteredClaimNames.Jti).Value;
-
-            await _tokenService.RevokeAccessTokenAsync(jti, ct);
-        }
-
-        HttpContext.Response.Cookies.Delete("refreshToken");
+        await _authService.LogoutAsync(refreshToken, accessToken, HttpContext.Response, ct);
 
         await SendOkAsync(ct);
     }
