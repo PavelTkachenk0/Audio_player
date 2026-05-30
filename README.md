@@ -30,7 +30,7 @@ REST API с JWT + 2FA, потоковой передачей аудио чере
 | API | **FastEndpoints** (REPR), тонкие эндпоинты |
 | Логика | **сервисный слой** + доменные мапперы (`EntityToDto`) — без репозиториев поверх EF |
 | Данные | **EF Core** / **PostgreSQL**, `IEntityTypeConfiguration` рядом с моделями |
-| Прочее | FluentValidation · Serilog · xUnit · Quartz |
+| Прочее | FluentValidation · Serilog · xUnit |
 
 **Безопасность:** BCrypt-хеширование паролей · CORS-allowlist · серверный отзыв токенов · секреты через переменные окружения.
 
