@@ -14,7 +14,7 @@ public class UpdateLinksTests
     public async Task Put_album_diff_marks_only_links_absent_from_the_request_for_deletion(
         long[] keepIds, long[] expectedDeletedIds)
     {
-        using var db = await UpdateLinksTestData.WithAlbumLinkedToArtists10And20();
+        await using var db = await UpdateLinksTestData.WithAlbumLinkedToArtists10And20();
 
         var loaded = await db.Albums
             .Include(x => x.ArtistsAlbums)

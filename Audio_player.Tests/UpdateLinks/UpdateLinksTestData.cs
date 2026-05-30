@@ -7,7 +7,7 @@ namespace Audio_player.Tests.UpdateLinks;
 /// <summary>Builds the InMemory database fixtures for the Put-update link-diff tests.</summary>
 public static class UpdateLinksTestData
 {
-    public static AppDbContext NewDb() =>
+    private static AppDbContext NewDb() =>
         new(new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase("links_" + Guid.NewGuid())
             .Options);
