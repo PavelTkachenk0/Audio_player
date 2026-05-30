@@ -17,8 +17,15 @@ public class UpdateLinksTests
             .UseInMemoryDatabase("links_" + Guid.NewGuid())
             .Options);
 
-    [Fact]
-    public async Task Put_album_marks_artist_links_no_longer_in_request_for_deletion()
+    // The album starts linked to artists 10 and 20; keepIds is the new request,
+    // expectedDeletedIds is what the "to delete" diff should produce.
+    [Theory]
+    [InlineData(new long[] { 10 }, new long[] { 20 })]        // keep 10 → drop 20
+    [InlineData(new long[] { 20 }, new long[] { 10 })]        // keep 20 → drop 10
+    [InlineData(new long[] { 10, 20 }, new long[] { })]       // keep both → drop nothing
+    [InlineData(new long[] { }, new long[] { 10, 20 })]       // keep none → drop both
+    public async Task Put_album_diff_marks_only_links_absent_from_the_request_for_deletion(
+        long[] keepIds, long[] expectedDeletedIds)
     {
         using var db = NewDb();
 
@@ -28,17 +35,16 @@ public class UpdateLinksTests
         db.Albums.Add(album);
         await db.SaveChangesAsync();
 
-        var artistsInRequest = new List<long> { 10 }; // keep 10, drop 20
-
         var loaded = await db.Albums
             .Include(x => x.ArtistsAlbums)
             .SingleAsync(x => x.Id == 1);
 
         var toDelete = loaded.ArtistsAlbums
-            .Where(x => !artistsInRequest.Contains(x.ArtistId) && x.AlbumId == loaded.Id)
-            .ToList();
+            .Where(x => !keepIds.Contains(x.ArtistId) && x.AlbumId == loaded.Id)
+            .Select(x => x.ArtistId)
+            .OrderBy(x => x)
+            .ToArray();
 
-        Assert.Single(toDelete);
-        Assert.Equal(20, toDelete[0].ArtistId);
+        Assert.Equal(expectedDeletedIds, toDelete);
     }
 }

@@ -19,14 +19,16 @@ public class TokenServiceTests
         return new GenerateTokenService(new TestOptionsSnapshot<AuthOptions>(authOptions), db);
     }
 
-    [Fact]
-    public void TwoFactorPendingToken_roundtrips_back_to_the_email()
+    [Theory]
+    [InlineData("user@test.com")]
+    [InlineData("another.user+tag@example.org")]
+    public void TwoFactorPendingToken_roundtrips_back_to_the_email(string email)
     {
         var svc = CreateService();
 
-        var token = svc.GenerateTwoFactorPendingToken("user@test.com");
+        var token = svc.GenerateTwoFactorPendingToken(email);
 
-        Assert.Equal("user@test.com", svc.ValidateTwoFactorPendingToken(token));
+        Assert.Equal(email, svc.ValidateTwoFactorPendingToken(token));
     }
 
     [Theory]
@@ -41,13 +43,14 @@ public class TokenServiceTests
         Assert.Null(svc.ValidateTwoFactorPendingToken(token));
     }
 
-    [Fact]
-    public void ValidateTwoFactorPendingToken_rejects_a_token_signed_with_a_different_key()
+    [Theory]
+    [InlineData("the_original_signing_key_padded_to_32_bytes_xxx", "a_completely_different_signing_key_padded_xxxxx")]
+    public void ValidateTwoFactorPendingToken_rejects_a_token_signed_with_a_different_key(string issuerKey, string attackerKey)
     {
-        var issuer = CreateService(key: "the_original_signing_key_padded_to_32_bytes_xxx");
+        var issuer = CreateService(key: issuerKey);
         var token = issuer.GenerateTwoFactorPendingToken("user@test.com");
 
-        var attacker = CreateService(key: "a_completely_different_signing_key_padded_xxxxx");
+        var attacker = CreateService(key: attackerKey);
 
         Assert.Null(attacker.ValidateTwoFactorPendingToken(token));
     }

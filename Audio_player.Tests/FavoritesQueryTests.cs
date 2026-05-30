@@ -17,42 +17,29 @@ public class FavoritesQueryTests
             .UseInMemoryDatabase("fav_" + Guid.NewGuid())
             .Options);
 
-    [Fact]
-    public async Task Favorite_tracks_returns_only_the_current_users_favorites()
+    [Theory]
+    [InlineData(100, 100, "Mine")] // a user sees their own favorite
+    [InlineData(200, 100, null)]   // a user does NOT see someone else's favorite
+    public async Task Favorite_tracks_are_scoped_to_the_current_user(long favoriterId, long currentUserId, string? expectedName)
     {
         using var db = NewDb();
 
         db.Songs.Add(new Song { Id = 1, SongName = "Mine", SongPath = "m.mp3", AlbumId = 1 });
-        db.Songs.Add(new Song { Id = 2, SongName = "Theirs", SongPath = "t.mp3", AlbumId = 1 });
-        db.UserSongs.Add(new UserSongs { SongId = 1, UserId = 100 });
-        db.UserSongs.Add(new UserSongs { SongId = 2, UserId = 200 });
+        db.UserSongs.Add(new UserSongs { SongId = 1, UserId = favoriterId });
         await db.SaveChangesAsync();
-
-        const long currentUserId = 100;
 
         var result = await db.Songs
             .Where(x => x.UserSongs.Any(us => us.UserId == currentUserId))
             .Select(x => x.SongName)
             .ToListAsync();
 
-        Assert.Equal(new[] { "Mine" }, result);
-    }
-
-    [Fact]
-    public async Task Favorite_tracks_excludes_songs_only_others_favorited()
-    {
-        using var db = NewDb();
-
-        db.Songs.Add(new Song { Id = 1, SongName = "A", SongPath = "a.mp3", AlbumId = 1 });
-        db.UserSongs.Add(new UserSongs { SongId = 1, UserId = 200 });
-        await db.SaveChangesAsync();
-
-        const long currentUserId = 100;
-
-        var result = await db.Songs
-            .Where(x => x.UserSongs.Any(us => us.UserId == currentUserId))
-            .ToListAsync();
-
-        Assert.Empty(result);
+        if (expectedName == null)
+        {
+            Assert.Empty(result);
+        }
+        else
+        {
+            Assert.Equal(new[] { expectedName }, result);
+        }
     }
 }

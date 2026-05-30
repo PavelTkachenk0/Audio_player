@@ -7,12 +7,15 @@ public class PasswordHasherTests
 {
     private readonly IPasswordHasher _hasher = new BcryptPasswordHasher();
 
-    [Fact]
-    public void Hash_does_not_return_the_plaintext()
+    [Theory]
+    [InlineData("correct horse battery staple")]
+    [InlineData("p@ssw0rd123")]
+    [InlineData("короткий")]
+    public void Hash_produces_a_bcrypt_hash_distinct_from_the_input(string password)
     {
-        var hash = _hasher.Hash("correct horse battery staple");
+        var hash = _hasher.Hash(password);
 
-        Assert.NotEqual("correct horse battery staple", hash);
+        Assert.NotEqual(password, hash);
         Assert.StartsWith("$2", hash); // bcrypt hashes start with $2a/$2b/$2y
     }
 
@@ -28,11 +31,14 @@ public class PasswordHasherTests
         Assert.Equal(expected, _hasher.Verify(attempt, hash));
     }
 
-    [Fact]
-    public void Verify_returns_false_for_a_legacy_plaintext_value_without_throwing()
+    [Theory]
+    [InlineData("root")]
+    [InlineData("password")]
+    [InlineData("123456")]
+    public void Verify_returns_false_for_a_legacy_plaintext_value_without_throwing(string legacyPlaintext)
     {
-        // Rows created before hashing stored the password verbatim. Verify must treat
-        // such a value as a mismatch instead of crashing on an invalid bcrypt salt.
-        Assert.False(_hasher.Verify("root", "root"));
+        // Rows created before hashing stored the password verbatim. Verify must treat such a
+        // value as a mismatch instead of crashing on an invalid bcrypt salt.
+        Assert.False(_hasher.Verify(legacyPlaintext, legacyPlaintext));
     }
 }
