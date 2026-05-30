@@ -16,20 +16,16 @@ public class PasswordHasherTests
         Assert.StartsWith("$2", hash); // bcrypt hashes start with $2a/$2b/$2y
     }
 
-    [Fact]
-    public void Verify_returns_true_for_the_correct_password()
+    [Theory]
+    [InlineData("p@ssw0rd123", "p@ssw0rd123", true)]    // correct password verifies
+    [InlineData("p@ssw0rd123", "totally-wrong", false)] // wrong password rejected
+    [InlineData("p@ssw0rd123", "P@ssw0rd123", false)]   // case-sensitive
+    [InlineData("p@ssw0rd123", "", false)]              // empty attempt rejected
+    public void Verify_matches_only_the_exact_original_password(string original, string attempt, bool expected)
     {
-        var hash = _hasher.Hash("p@ssw0rd123");
+        var hash = _hasher.Hash(original);
 
-        Assert.True(_hasher.Verify("p@ssw0rd123", hash));
-    }
-
-    [Fact]
-    public void Verify_returns_false_for_a_wrong_password()
-    {
-        var hash = _hasher.Hash("p@ssw0rd123");
-
-        Assert.False(_hasher.Verify("totally-wrong", hash));
+        Assert.Equal(expected, _hasher.Verify(attempt, hash));
     }
 
     [Fact]

@@ -29,12 +29,16 @@ public class TokenServiceTests
         Assert.Equal("user@test.com", svc.ValidateTwoFactorPendingToken(token));
     }
 
-    [Fact]
-    public void ValidateTwoFactorPendingToken_returns_null_for_garbage()
+    [Theory]
+    [InlineData("")]
+    [InlineData("garbage")]
+    [InlineData("not.a.valid.token")]
+    [InlineData("a.b.c")]
+    public void ValidateTwoFactorPendingToken_returns_null_for_malformed_input(string token)
     {
         var svc = CreateService();
 
-        Assert.Null(svc.ValidateTwoFactorPendingToken("not.a.valid.token"));
+        Assert.Null(svc.ValidateTwoFactorPendingToken(token));
     }
 
     [Fact]
